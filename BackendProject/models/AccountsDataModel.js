@@ -124,7 +124,6 @@ const AccountsDataSchema = new mongoose.Schema(
     subIdEklectic: { type: String },
     childNumber: { type: Number },
     maxChildren: { type: Number },
-    maxChildren: { type: Number },
   },
   { timestamps: true }
 );

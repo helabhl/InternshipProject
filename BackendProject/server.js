@@ -1,37 +1,32 @@
 const express = require('express');
-const mongoose = require('./db'); // ou require('./db.js')
+const mongoose = require('./db'); 
 
-const AccountData = require('./models/AccountsDataModel'); // ton modèle mongoose
+const AccountData = require('./models/AccountsDataModel'); 
 const QuizAttempt = require('./models/QuizAttemptModel');
 
 
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
-app.get('/', async (req, res) => {
-  // Récupérer page et limit depuis la query string, ex: /?page=2&limit=5
-  let { page = 1, limit = 5 } = req.query;
 
-  // Convertir en nombre
-  page = parseInt(page);
-  limit = parseInt(limit);
+const accountsRoutes = require('./routes/accountsDataRoutes');
+app.use('/accounts', accountsRoutes);
 
-  try {
-    console.log(`🔍 Récupération des comptes page ${page} avec limite ${limit}`);
-    const accounts = await AccountData.find({})
-      .skip((page - 1) * limit)
-      .limit(limit);
-    res.json(accounts);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+
+const attemptsRoutes = require('./routes/quizAttemptsRoutes');
+app.use('/attempts', attemptsRoutes);
+
+
+
+const dashboardRoutes = require("./routes/dashboardRoutes");
+app.use("/dashboard", dashboardRoutes);
+
+
+app.get('/', (req, res) => {
+  res.send('Hello from root!');
 });
-
-const quizAttemptsRoutes = require('./routes/quizAttemptsRoutes');
-app.use('/quiz-attempts', quizAttemptsRoutes);
-
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

@@ -18,3 +18,21 @@ exports.getAllAccounts = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getAccountByUserID = async (req, res) => {
+  const { userID } = req.params;
+
+  try {
+    const account = await AccountsData.findOne({ userID });
+    if (!account) {
+      return res.status(404).json({ message: "Account not found with userID " + userID });
+    }
+    res.json(account);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+

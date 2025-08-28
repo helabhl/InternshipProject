@@ -453,6 +453,144 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+
+        /* Nouveaux styles pour les statistiques par matière */
+        .subject-stats {
+            margin-top: 2rem;
+        }
+        
+        .subject-stats h2 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .subject-stats h2 i {
+            color: var(--primary);
+        }
+        
+        .subject-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .subject-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .subject-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gray-light);
+        }
+        
+        .subject-name {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+        
+        .subject-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .subject-stat {
+            text-align: center;
+        }
+        
+        .subject-stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .subject-stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .chapter-list {
+            margin-top: 1rem;
+        }
+        
+        .chapter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        .chapter-item:last-child {
+            border-bottom: none;
+        }
+        
+        .chapter-name {
+            flex: 1;
+        }
+        
+        .chapter-stats {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .chapter-stat {
+            text-align: center;
+            min-width: 70px;
+        }
+        
+        .chapter-stat-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .chapter-stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: var(--gray-light);
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            border-radius: 4px;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .subject-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .subject-stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .chapter-stats {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+        }
     </style>
 </head>
 <body dir="ltr">
@@ -566,6 +704,13 @@
         </div>
     </div>
    
+    <!-- Nouvelle section pour les statistiques par matière -->
+    <div class="container subject-stats">
+        <h2><i class="fas fa-book-open"></i> Statistiques par matière</h2>
+        <div class="subject-cards" id="subjectStatsContainer">
+            <!-- Les cartes des matières seront générées ici par JavaScript -->
+        </div>
+    </div>
 
     <footer>
         <p>© 2023 Système de suivi. Tous droits réservés.</p>
@@ -762,6 +907,8 @@ loadNameKids("+14388864855");
         })
         .then(data => {
             displayMetrics(data);
+            renderSubjectStats(data);  // <-- appeler ici avec les bonnes données
+
         })
         
     }
@@ -1108,6 +1255,150 @@ loadNameKids("+14388864855");
             }
         };
 
+
+
+       
+       // Fonction pour générer les cartes de statistiques par matière
+function renderSubjectStats(data) {
+    const container = document.getElementById('subjectStatsContainer');
+    container.innerHTML = '';
+    
+    const subjectStats = data.subject_stats || {};
+    const chapterDistribution = data.chapter_distribution || {};
+    
+    // Créer une carte pour chaque matière
+    for (const [subjectName, stats] of Object.entries(subjectStats)) {
+        const subjectCard = document.createElement('div');
+        subjectCard.className = 'subject-card';
+        
+        // En-tête de la carte
+        const subjectHeader = document.createElement('div');
+        subjectHeader.className = 'subject-header';
+        
+        const subjectNameEl = document.createElement('div');
+        subjectNameEl.className = 'subject-name';
+        subjectNameEl.textContent = subjectName;
+        
+        subjectHeader.appendChild(subjectNameEl);
+        subjectCard.appendChild(subjectHeader);
+        
+        // Grille des stats principales
+        const statsGrid = document.createElement('div');
+        statsGrid.className = 'subject-stats-grid';
+        
+        // Score moyen
+        const avgScoreStat = createSubjectStat(
+            `${(stats.average_score * 100).toFixed(1)}%`, 
+            'Score moyen'
+        );
+        statsGrid.appendChild(avgScoreStat);
+        
+        // Tests complétés
+        const completedStat = createSubjectStat(
+            `${stats.completed}/${stats.count}`, 
+            'Complétés'
+        );
+        statsGrid.appendChild(completedStat);
+        
+        // Taux de complétion
+        const completionRate = stats.count > 0 ? (stats.completed / stats.count) * 100 : 0;
+        const completionStat = createSubjectStat(
+            `${completionRate.toFixed(1)}%`, 
+            'Taux de complétion'
+        );
+        statsGrid.appendChild(completionStat);
+        
+        // Barre de progression
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        const progressFill = document.createElement('div');
+        progressFill.className = 'progress-fill';
+        progressFill.style.width = `${completionRate}%`;
+        progressBar.appendChild(progressFill);
+        completionStat.appendChild(progressBar);
+        
+        subjectCard.appendChild(statsGrid);
+        
+        // Liste des chapitres imbriqués
+        const chapterList = document.createElement('div');
+        chapterList.className = 'chapter-list';
+        
+        const subjectChapters = chapterDistribution[subjectName] || {};
+        
+        if (Object.keys(subjectChapters).length > 0) {
+            const chapterTitle = document.createElement('div');
+            chapterTitle.className = 'chapter-title';
+            chapterTitle.style.fontWeight = '600';
+            chapterTitle.style.margin = '1rem 0 0.5rem 0';
+            chapterTitle.textContent = 'Chapitres:';
+            chapterList.appendChild(chapterTitle);
+            
+            for (const [chapterName, chapterStats] of Object.entries(subjectChapters)) {
+                const chapterItem = document.createElement('div');
+                chapterItem.className = 'chapter-item';
+                
+                const chapterNameEl = document.createElement('div');
+                chapterNameEl.className = 'chapter-name';
+                chapterNameEl.textContent = chapterName;
+                
+                const chapterStatsEl = document.createElement('div');
+                chapterStatsEl.className = 'chapter-stats';
+                
+                // Score moyen du chapitre
+                const chapterScore = document.createElement('div');
+                chapterScore.className = 'chapter-stat';
+                const scoreValue = document.createElement('div');
+                scoreValue.className = 'chapter-stat-value';
+                scoreValue.textContent = `${(chapterStats.average_score * 100).toFixed(1)}%`;
+                const scoreLabel = document.createElement('div');
+                scoreLabel.className = 'chapter-stat-label';
+                scoreLabel.textContent = 'Score';
+                chapterScore.appendChild(scoreValue);
+                chapterScore.appendChild(scoreLabel);
+                
+                // Tentatives du chapitre
+                const chapterAttempts = document.createElement('div');
+                chapterAttempts.className = 'chapter-stat';
+                const attemptsValue = document.createElement('div');
+                attemptsValue.className = 'chapter-stat-value';
+                attemptsValue.textContent = chapterStats.attempts;
+                const attemptsLabel = document.createElement('div');
+                attemptsLabel.className = 'chapter-stat-label';
+                attemptsLabel.textContent = 'Tentatives';
+                chapterAttempts.appendChild(attemptsValue);
+                chapterAttempts.appendChild(attemptsLabel);
+                
+                chapterStatsEl.appendChild(chapterScore);
+                chapterStatsEl.appendChild(chapterAttempts);
+                
+                chapterItem.appendChild(chapterNameEl);
+                chapterItem.appendChild(chapterStatsEl);
+                chapterList.appendChild(chapterItem);
+            }
+        }
+        
+        subjectCard.appendChild(chapterList);
+        container.appendChild(subjectCard);
+    }
+}
+
+// Fonction utilitaire
+function createSubjectStat(value, label) {
+    const stat = document.createElement('div');
+    stat.className = 'subject-stat';
+    
+    const valueEl = document.createElement('div');
+    valueEl.className = 'subject-stat-value';
+    valueEl.textContent = value;
+    
+    const labelEl = document.createElement('div');
+    labelEl.className = 'subject-stat-label';
+    labelEl.textContent = label;
+    
+    stat.appendChild(valueEl);
+    stat.appendChild(labelEl);
+    return stat;
+}
 
     </script>
 </body>

@@ -226,9 +226,12 @@ def abandonment_rate(attempts):
 
 def chapter_distribution(attempts, quizzes):
     """
-    Retourne un dictionnaire de distribution des chapitres.
-    Clé: 'subject_chapter' (str)
-    Valeur: dict avec 'attempts' et 'average_score'
+    Retourne une distribution imbriquée :
+    {
+        subject: {
+            chapter: {"attempts": int, "average_score": float}
+        }
+    }
     """
     distribution = {}
 
@@ -236,20 +239,26 @@ def chapter_distribution(attempts, quizzes):
         quiz = quizzes.get(str(a.get("quizID")))
         subject = quiz.get("subject", "inconnu") if quiz else "inconnu"
         chapter = quiz.get("chapter", "inconnu") if quiz else "inconnu"
-        key = f"{subject} - {chapter}"  # ✅ clé en str
 
-        if key not in distribution:
-            distribution[key] = {"attempts": 0, "total_score": 0}
+        if subject not in distribution:
+            distribution[subject] = {}
 
-        distribution[key]["attempts"] += 1
-        distribution[key]["total_score"] += a.get("score", 0)
+        if chapter not in distribution[subject]:
+            distribution[subject][chapter] = {"attempts": 0, "total_score": 0}
 
-    # Calculer la moyenne
-    for stats in distribution.values():
-        stats["average_score"] = stats["total_score"] / stats["attempts"] if stats["attempts"] > 0 else 0
-        del stats["total_score"]  # supprimer si non nécessaire
+        distribution[subject][chapter]["attempts"] += 1
+        distribution[subject][chapter]["total_score"] += a.get("score", 0)
+
+    # Calcul des moyennes
+    for subject, chapters in distribution.items():
+        for chapter, stats in chapters.items():
+            stats["average_score"] = (
+                stats["total_score"] / stats["attempts"] if stats["attempts"] > 0 else 0
+            )
+            del stats["total_score"]
 
     return distribution
+
 
 def total_time_spent(attempts):
     total_time = 0
@@ -268,7 +277,6 @@ def persistent_failures(attempts):
             failed_quizzes[quiz_id] = failed_quizzes.get(quiz_id, 0) + 1
     # filtrer ceux >=3
     return {k: v for k, v in failed_quizzes.items() if v >= 3}
-
 
 @performance_bp.route("/<userId>/kids/<kidIndex>/messagesCodes", methods=["GET"])
 def get_messages_codes(userId, kidIndex):
@@ -437,7 +445,6 @@ def get_messages_codes(userId, kidIndex):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @performance_bp.route("/metrics/<userId>/kids/<kidIndex>", methods=["GET"])
 def get_kid_metrics(userId, kidIndex):
     try:
@@ -489,8 +496,6 @@ def get_kid_metrics(userId, kidIndex):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
 
 @performance_bp.route("/performances/<user_id>/<kidId>", methods=["GET"])
 def get_performance(user_id,kidId):

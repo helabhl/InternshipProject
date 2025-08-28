@@ -85,21 +85,39 @@ def create_or_update_attempt():
         if not attempt:
             created = True
             now = datetime.now(timezone.utc)  # UTC aware
+            # Création
             attempt = AttemptData(
                 userID=userID,
                 kidIndex=kidIndex,
                 quizID=quizID,
-                start_time=now
+                start_time=datetime.utcnow()  # naive UTC
             )
             attempt.init_answers(num_questions)
+        # 1) Vérifier progression séquentielle
+        if question_index > 0:
+            prev_answer = attempt.answers[question_index - 1]
+            if prev_answer.correct_answer == 0:  # question précédente pas encore correcte
+                return jsonify({"error": f"Vous devez d'abord répondre correctement à la question {question_index - 1}"}), 400
 
+        # 2) Vérifier verrouillage de la question
+        if attempt.answers[question_index].correct_answer == 1:
+            return jsonify({"error": f"La question {question_index} est déjà correcte, vous ne pouvez plus la modifier"}), 400
+
+        # Vérifier que l'index de question est valide
+        if question_index < 0 or question_index >= num_questions:
+            return jsonify({
+                "error": f"L'index de question {question_index} est invalide. Valeurs valides : 0 à {num_questions - 1}"
+            }), 400
+        
+        
         # Met à jour la question spécifique
         attempt.answers[question_index].correct_answer = is_correct
         attempt.answers[question_index].hint_used += hint_used
         attempt.answers[question_index].wrong_answer += is_wrong
 
         # Met à jour les temps
-        attempt.end_time = datetime.now(timezone.utc)  # UTC aware
+        attempt.end_time = datetime.utcnow()
+        time_spent = int((attempt.end_time - attempt.start_time).total_seconds())
 
         # Calcul du score
         correct_answers = sum(q.correct_answer for q in attempt.answers)
@@ -110,9 +128,6 @@ def create_or_update_attempt():
         elif total_wrong_attempts >= 3:
             attempt.failed = 1
 
-
-        now = datetime.utcnow()  # naive UTC
-        time_spent = int((now - attempt.start_time).total_seconds())
         attempt.score = calculate_score(attempt.answers, time_spent)
 
         attempt.save()

@@ -89,7 +89,7 @@ def dd():
     return render_template("users/base.html")
 
 
-@app.route("/d")
+@app.route("/")
 def d():
     return render_template("users/dash.html")
 

@@ -1,2 +1,8 @@
 Flask==3.0.0
 pymongo==4.6.1
+mongoengine
+twilio
+dotenv
+pandas
+apscheduler
+flask_cors

@@ -14,14 +14,14 @@ const PORT = process.env.PORT;
 const accountsRoutes = require('./routes/accountsDataRoutes');
 app.use('/accounts', accountsRoutes);
 
+const quizesRoutes = require('./routes/quizesRoutes');
+app.use('/quizes', quizesRoutes);
+
+const quizesAttemptsRoutes = require('./routes/quizesAttemptsRoutes');
+app.use('/quiz-attempts', quizesAttemptsRoutes);
 
 const attemptsRoutes = require('./routes/quizAttemptsRoutes');
 app.use('/attempts', attemptsRoutes);
-
-
-
-const dashboardRoutes = require("./routes/dashboardRoutes");
-app.use("/dashboard", dashboardRoutes);
 
 
 app.get('/', (req, res) => {

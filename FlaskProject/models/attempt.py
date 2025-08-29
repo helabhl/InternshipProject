@@ -6,7 +6,7 @@ class Answer(EmbeddedDocument):
     correct_answer = IntField(min_value=0, required=True, default=0)
     wrong_answer = IntField(min_value=0, required=True, default=0)
     hint_used = IntField(min_value=0, required=True, default=0)
-    time_per_question = IntField(min_value=0, required=True, default=0)
+    time_per_question = IntField(min_value=0,  default=0)
     start_time = DateTimeField()
     end_time = DateTimeField()
 

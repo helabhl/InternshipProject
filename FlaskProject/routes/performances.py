@@ -433,7 +433,7 @@ def get_messages_codes(userId, kidIndex):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@performance_bp.route("/user/<userId>/kid/<kidIndex>//metrics", methods=["GET"])
+@performance_bp.route("/user/<userId>/kid/<kidIndex>/metrics", methods=["GET"])
 def get_kid_metrics(userId, kidIndex):
     try:
         # 🔹 Récupérer période

@@ -18,37 +18,44 @@ def mongo_to_dict(obj):
         data["quizID"] = str(data["quizID"])
     return data
 
-def calculate_score(answers, min_time=120, max_time=300):
+def calculate_score(answers, min_time=60, max_time=300):
     num_questions = len(answers)
     if num_questions == 0:
         return 0.0
 
     sum_success_rate = 0
     for ans in answers:
-        # Calcul du speed selon le temps par question
-        if ans.time_per_question < min_time:
+        t = ans.time_per_question or 0  # éviter None
+
+        # Calcul du speed (borné entre 0 et 1)
+        if t < min_time:
             speed = 1
-        elif ans.time_per_question <= max_time:
-            speed = 1 - (ans.time_per_question - min_time) / (max_time - min_time)
+        elif t <= max_time:
+            speed = 1 - (t - min_time) / (max_time - min_time)
         else:
             speed = 0
+        speed = max(0, min(1, speed))  # clamp entre 0 et 1
 
         # Calcul du success rate pondéré
         numerator = ans.correct_answer
         denominator = ans.wrong_answer + ans.hint_used + 1  # éviter /0
-        sum_success_rate += 0.9 * (numerator / denominator) + 0.1 * speed
+        success = numerator / denominator
+
+        sum_success_rate += 0.9 * success + 0.1 * speed
 
     avg_success_rate = sum_success_rate / num_questions
-    return avg_success_rate
+    return round(avg_success_rate, 2)
 
-@attempts_bp.route('/attempts', methods=['POST'])
+
+@attempts_bp.route('/create-attempt', methods=['POST'])
 def create_attempt():
     try:
         data = request.get_json()
         userID = data.get("userID")
         kidIndex = data.get("kidIndex")
         quizID = data.get("quizID")
-        deviceType = data.get("device")   
+        deviceType = data.get("deviceType")   
+        device = data.get("device")   
 
 
         if not all([userID, kidIndex, quizID]):
@@ -63,25 +70,13 @@ def create_attempt():
 
         num_questions = len(quiz.questions)
 
-        # Vérifier qu'il n'existe pas déjà une tentative active
-        attempt = AttemptData.objects(
-            userID=userID,
-            kidIndex=kidIndex,
-            quizID=quizID,
-            deviceType=deviceType,
-            completed=0,
-            failed=0,
-            abandoned=0
-        ).first()
-        if attempt:
-            return jsonify({"error": "Une tentative est déjà en cours"}), 400
-
         # Création de la tentative
         attempt = AttemptData(
             userID=userID,
             kidIndex=kidIndex,
             quizID=quizID,
-            deviceType=device,
+            deviceType=deviceType,
+            device=device
         )
         attempt.init_answers(num_questions)
         attempt.save()
@@ -96,24 +91,32 @@ def create_attempt():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@attempts_bp.route('/attempts/<attempt_id>', methods=['PUT'])
-def update_attempt(attempt_id):
+@attempts_bp.route('/update-attempt', methods=['POST'])
+def update_attempt():
     try:
-        if not ObjectId.is_valid(attempt_id):
-            return jsonify({"error": "attempt_id invalide"}), 400
-
-        attempt = AttemptData.objects(id=ObjectId(attempt_id)).first()
-        if not attempt:
-            return jsonify({"error": "Tentative non trouvée"}), 404
+        def to_utc_aware(dt):
+            """Convertir datetime naïf en UTC aware"""
+            if dt and dt.tzinfo is None:
+                return dt.replace(tzinfo=timezone.utc)
+            return dt
 
         data = request.get_json()
+        attempt_id = data.get("attempt_id")
         question_index = data.get("question_index")
         is_correct = int(data.get("is_correct", 0))
         hint_used = int(data.get("hint_used", 0))
         is_wrong = int(data.get("is_wrong", 0))
-        start_time_str = data.get("start_time")
+        is_starting = bool(data.get("is_starting", False))
+
+        # Vérif existence tentative
+        attempt = AttemptData.objects(id=ObjectId(attempt_id)).first()
+        if not attempt:
+            return jsonify({"error": "Tentative non trouvée"}), 404
 
         num_questions = len(attempt.answers)
+
+        if not ObjectId.is_valid(attempt_id):
+            return jsonify({"error": "attempt_id invalide"}), 400
 
         # Vérifier l'index
         if question_index is None or question_index < 0 or question_index >= num_questions:
@@ -127,22 +130,30 @@ def update_attempt(attempt_id):
         if attempt.answers[question_index].correct_answer == 1:
             return jsonify({"error": f"La question {question_index} est déjà correcte, vous ne pouvez plus la modifier"}), 400
 
-        # Vérifier start_time
-        if not start_time_str:
-            return jsonify({"error": "start_time de la question manquant"}), 400
-        question_start_time = datetime.fromisoformat(start_time_str)
-        attempt.answers[question_index].start_time = question_start_time
-
-        # end_time = maintenant (UTC aware)
         now = datetime.now(timezone.utc)
-        attempt.answers[question_index].end_time = now
 
-        # temps écoulé
-        attempt.answers[question_index].time_per_question = int(
-            (attempt.answers[question_index].end_time - attempt.answers[question_index].start_time).total_seconds()
-        )
+        if is_starting:
+            # Début de tentative
+            attempt.answers[question_index].start_time = now
+            attempt.has_started = True
+        else:
+            # Fin de tentative → vérifier que start_time existe
+            if not attempt.answers[question_index].start_time:
+                return jsonify({"error": "tentative is not starting"}), 400
 
-        # Mettre à jour les statistiques
+            start_time = to_utc_aware(attempt.answers[question_index].start_time)
+            attempt.answers[question_index].end_time = now
+
+            end_time = to_utc_aware(attempt.answers[question_index].end_time)
+
+            attempt.answers[question_index].time_per_question = int(
+                (end_time - start_time).total_seconds()
+            )
+
+        
+            attempt.score = calculate_score(attempt.answers, attempt.answers[question_index].time_per_question)
+
+        # Mettre à jour les stats
         attempt.answers[question_index].correct_answer = is_correct
         attempt.answers[question_index].hint_used += hint_used
         attempt.answers[question_index].wrong_answer += is_wrong
@@ -155,9 +166,6 @@ def update_attempt(attempt_id):
         elif total_wrong_attempts >= 3:
             attempt.failed = 1
 
-        total_time = sum(a.time_per_question for a in attempt.answers)
-        attempt.score = calculate_score(attempt.answers, total_time)
-
         attempt.save()
 
         status = "completed" if attempt.completed else \
@@ -165,12 +173,16 @@ def update_attempt(attempt_id):
                  "abandoned" if attempt.abandoned else \
                  "in_progress"
 
-        return jsonify({
+        # Réponse JSON : score uniquement si on a terminé une question
+        response = {
             "message": "Réponse mise à jour",
-            "score": attempt.score,
             "status": status,
             "attempt_id": str(attempt.id)
-        }), 200
+        }
+        if not is_starting:
+            response["score"] = attempt.score
+
+        return jsonify(response), 200
 
     except ValidationError as e:
         return jsonify({"error": str(e)}), 400

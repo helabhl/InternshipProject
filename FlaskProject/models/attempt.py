@@ -11,11 +11,6 @@ class Answer(EmbeddedDocument):
     end_time = DateTimeField()
 
 
-class DeviceInfo(EmbeddedDocument):
-    type = StringField(choices=["web", "mobile", "tablet"], required=True)
-    os = StringField(required=True)
-    model = StringField(required=True)
-
 
 class AttemptData(Document):
     userID = StringField(required=True)
@@ -28,7 +23,8 @@ class AttemptData(Document):
     failed = IntField(default=0)
     completed = IntField(default=0)
     abandoned = IntField(default=0)
-    device = EmbeddedDocumentField(DeviceInfo)
+    deviceType = StringField()
+    device = StringField()
 
     meta = {
         'collection': 'attemptsdata',

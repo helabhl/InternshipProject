@@ -48,7 +48,7 @@ def create_attempt():
         userID = data.get("userID")
         kidIndex = data.get("kidIndex")
         quizID = data.get("quizID")
-        device_info = data.get("device")   
+        deviceType = data.get("device")   
 
 
         if not all([userID, kidIndex, quizID]):
@@ -68,7 +68,7 @@ def create_attempt():
             userID=userID,
             kidIndex=kidIndex,
             quizID=quizID,
-            device=device_info,
+            deviceType=deviceType,
             completed=0,
             failed=0,
             abandoned=0
@@ -81,6 +81,7 @@ def create_attempt():
             userID=userID,
             kidIndex=kidIndex,
             quizID=quizID,
+            deviceType=device,
         )
         attempt.init_answers(num_questions)
         attempt.save()

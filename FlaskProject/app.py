@@ -90,6 +90,10 @@ def dd():
 def d():
     return render_template("users/dash.html")
 
+@app.route("/api-test")
+def api_test():
+    return render_template("api_test.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)

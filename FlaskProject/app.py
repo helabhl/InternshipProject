@@ -79,12 +79,9 @@ def create_admin():
 @app.route("/home")
 def home():
     return render_template("users/home.html")
-@app.route("/dash")
-def dashboard():
-    return render_template("users/dashboard.html")
 
 
-@app.route("/dd")
+@app.route("/dashboard")
 def dd():
     return render_template("users/base.html")
 

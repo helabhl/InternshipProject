@@ -9,6 +9,7 @@ import random
 
 
 performance_bp = Blueprint("performancesdata", __name__)
+
 def calculate_engagement(attempts, from_date, to_date):
     """
     Nombre de jours de pratique entre from_date et to_date inclus.
@@ -22,7 +23,6 @@ def calculate_engagement(attempts, from_date, to_date):
 
     total_days = (to_date.date() - from_date.date()).days + 1
     return len(practice_days), total_days
-
 
 def calculate_streak(attempts):
     """Plus longue série de quiz réussis (completed=1)"""
@@ -47,7 +47,6 @@ def calculate_completion_rate(attempts):
     total = len(attempts)
     
     return completed, total
-
 
 def calculate_progress(attempts, from_date, to_date, period="week"):
     """
@@ -94,7 +93,6 @@ def calculate_progress(attempts, from_date, to_date, period="week"):
 
     return (current_count - prev_count) / prev_count
 
-
 def calculate_mastery(attempts, quizzes):
     """Sujets maîtrisés (score moyen > 70%)"""
     subject_scores = {}
@@ -111,11 +109,6 @@ def calculate_mastery(attempts, quizzes):
         if sum(scores) / len(scores) >= 0.7
     }
     return mastery
-
-
-
-
-
 
 def calculate_perseverance(attempts, quizzes):
     """
@@ -163,8 +156,6 @@ def get_subject_from_quiz(attempt, quizzes):
     quiz = quizzes.get(str(quiz_id))
     return quiz.get("subject", "Inconnu") if quiz else "Inconnu"
 
-
-
 def subject_stats(attempts, quizzes):
     """
     Retourne un dictionnaire avec:
@@ -209,7 +200,6 @@ def calculate_balance_score(subject_stats):
     max_ratio = max(s["count"] / total_attempts for s in subject_stats.values())
     return int(min(100, 100 - (max_ratio * 50)))
 
-
 def recommend_subject(subject_stats):
     """
     Retourne la matière la moins travaillée (et score le plus faible en cas d'égalité)
@@ -222,7 +212,6 @@ def abandonment_rate(attempts):
     total = len(attempts)
     abandoned = sum(1 for a in attempts if a.get("abandoned") == 1)
     return abandoned, total if total else 0
-
 
 def chapter_distribution(attempts, quizzes):
     """
@@ -259,7 +248,6 @@ def chapter_distribution(attempts, quizzes):
 
     return distribution
 
-
 def total_time_spent(attempts):
     total_time = 0
     for a in attempts:
@@ -278,7 +266,7 @@ def persistent_failures(attempts):
     # filtrer ceux >=3
     return {k: v for k, v in failed_quizzes.items() if v >= 3}
 
-@performance_bp.route("/<userId>/kids/<kidIndex>/messagesCodes", methods=["GET"])
+@performance_bp.route("/user/<userId>/kid/<kidIndex>/messages-codes", methods=["GET"])
 def get_messages_codes(userId, kidIndex):
     try:
         # Récupérer période
@@ -445,7 +433,7 @@ def get_messages_codes(userId, kidIndex):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@performance_bp.route("/metrics/<userId>/kids/<kidIndex>", methods=["GET"])
+@performance_bp.route("/user/<userId>/kid/<kidIndex>//metrics", methods=["GET"])
 def get_kid_metrics(userId, kidIndex):
     try:
         # 🔹 Récupérer période
@@ -497,8 +485,8 @@ def get_kid_metrics(userId, kidIndex):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@performance_bp.route("/performances/<user_id>/<kidId>", methods=["GET"])
-def get_performance(user_id,kidId):
+@performance_bp.route("/user/<user_id>/kid/<kidIndex>/performances", methods=["GET"])
+def get_performance(user_id,kidIndex):
     try:
         from_str = request.args.get("from")
         to_str = request.args.get("to")
@@ -507,7 +495,7 @@ def get_performance(user_id,kidId):
 
         attempts = AttemptData.objects(
             userID=user_id,
-            kidIndex=kidId,
+            kidIndex=kidIndex,
             start_time__gte=from_date,
             start_time__lte=to_date
         )
@@ -558,11 +546,6 @@ def get_performance(user_id,kidId):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500    
-
-
-
-
-
 
 
 ##############

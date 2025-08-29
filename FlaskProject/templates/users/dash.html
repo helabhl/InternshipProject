@@ -776,25 +776,25 @@ async function loadNameKids(userID) {
 
      // 🎯 Quand on change d’enfant dans la liste
     select.addEventListener("change", (e) => {
-  const newKidIndex = e.target.value;
-  const kidName = e.target.options[e.target.selectedIndex].text;
-  console.log("🔄 Changement enfant → index:", newKidIndex, "nom:", kidName);
+        const newKidIndex = e.target.value;
+        const kidName = e.target.options[e.target.selectedIndex].text;
+        console.log("🔄 Changement enfant → index:", newKidIndex, "nom:", kidName);
 
-  // ✅ Mettre à jour la variable globale
-  kidIndex = newKidIndex;
+        // ✅ Mettre à jour la variable globale
+        kidIndex = newKidIndex;
 
-  // ✅ Recharger les performances avec le nouvel enfant
-  updateDisplayedData(kidIndex);
-});
+        // ✅ Recharger les performances avec le nouvel enfant
+        updateDisplayedData(kidIndex);
+        });
 
 
-  } catch (err) {
-    console.error("💥 Erreur API enfants:", err);
-  }
-}
+    } catch (err) {
+        console.error("💥 Erreur API enfants:", err);
+    }
+    }
 
-// Exemple d’appel avec ton userID
-loadNameKids("+14388864855");
+    // Exemple d’appel avec ton userID
+    loadNameKids("+14388864855");
     // Sélection des éléments de l’interface
     const periodDisplay = document.getElementById('period-display');
     const prevPeriodBtn = document.getElementById('prev-period');
@@ -900,7 +900,7 @@ loadNameKids("+14388864855");
     
     // Fonction pour charger les métriques
     function loadMetrics(fromStr, toStr) {
-        fetch(`/metrics/${userID}/kids/${kidIndex}?from=${fromStr}&to=${toStr}&period=${currentPeriod}`)
+        fetch(`/user/${userID}/kid/${kidIndex}/metrics?from=${fromStr}&to=${toStr}&period=${currentPeriod}`)
         .then(res => {
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             return res.json();
@@ -949,7 +949,7 @@ loadNameKids("+14388864855");
     
     // ---------------------------
     function loadMessages(fromStr, toStr) {
-        fetch(`/${userID}/kids/${kidIndex}/messagesCodes?from=${fromStr}&to=${toStr}&period=${currentPeriod}`)
+        fetch(`/user/${userID}/kid/${kidIndex}/messages-codes?from=${fromStr}&to=${toStr}&period=${currentPeriod}`)
             .then(res => {
                 if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
                 return res.json();
@@ -1009,7 +1009,7 @@ loadNameKids("+14388864855");
 
     // ---------------------------
     function loadPerformances(fromStr, toStr) {
-        fetch(`/performances/${userID}/${kidIndex}?from=${fromStr}&to=${toStr}&period=${currentPeriod}`)
+        fetch(`/user/${userID}/kid/${kidIndex}/performances?from=${fromStr}&to=${toStr}&period=${currentPeriod}`)
             .then(res => {
                 if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
                 return res.json();
@@ -1256,149 +1256,147 @@ loadNameKids("+14388864855");
         };
 
 
-
-       
-       // Fonction pour générer les cartes de statistiques par matière
-function renderSubjectStats(data) {
-    const container = document.getElementById('subjectStatsContainer');
-    container.innerHTML = '';
-    
-    const subjectStats = data.subject_stats || {};
-    const chapterDistribution = data.chapter_distribution || {};
-    
-    // Créer une carte pour chaque matière
-    for (const [subjectName, stats] of Object.entries(subjectStats)) {
-        const subjectCard = document.createElement('div');
-        subjectCard.className = 'subject-card';
+    // Fonction pour générer les cartes de statistiques par matière
+    function renderSubjectStats(data) {
+        const container = document.getElementById('subjectStatsContainer');
+        container.innerHTML = '';
         
-        // En-tête de la carte
-        const subjectHeader = document.createElement('div');
-        subjectHeader.className = 'subject-header';
+        const subjectStats = data.subject_stats || {};
+        const chapterDistribution = data.chapter_distribution || {};
         
-        const subjectNameEl = document.createElement('div');
-        subjectNameEl.className = 'subject-name';
-        subjectNameEl.textContent = subjectName;
-        
-        subjectHeader.appendChild(subjectNameEl);
-        subjectCard.appendChild(subjectHeader);
-        
-        // Grille des stats principales
-        const statsGrid = document.createElement('div');
-        statsGrid.className = 'subject-stats-grid';
-        
-        // Score moyen
-        const avgScoreStat = createSubjectStat(
-            `${(stats.average_score * 100).toFixed(1)}%`, 
-            'Score moyen'
-        );
-        statsGrid.appendChild(avgScoreStat);
-        
-        // Tests complétés
-        const completedStat = createSubjectStat(
-            `${stats.completed}/${stats.count}`, 
-            'Complétés'
-        );
-        statsGrid.appendChild(completedStat);
-        
-        // Taux de complétion
-        const completionRate = stats.count > 0 ? (stats.completed / stats.count) * 100 : 0;
-        const completionStat = createSubjectStat(
-            `${completionRate.toFixed(1)}%`, 
-            'Taux de complétion'
-        );
-        statsGrid.appendChild(completionStat);
-        
-        // Barre de progression
-        const progressBar = document.createElement('div');
-        progressBar.className = 'progress-bar';
-        const progressFill = document.createElement('div');
-        progressFill.className = 'progress-fill';
-        progressFill.style.width = `${completionRate}%`;
-        progressBar.appendChild(progressFill);
-        completionStat.appendChild(progressBar);
-        
-        subjectCard.appendChild(statsGrid);
-        
-        // Liste des chapitres imbriqués
-        const chapterList = document.createElement('div');
-        chapterList.className = 'chapter-list';
-        
-        const subjectChapters = chapterDistribution[subjectName] || {};
-        
-        if (Object.keys(subjectChapters).length > 0) {
-            const chapterTitle = document.createElement('div');
-            chapterTitle.className = 'chapter-title';
-            chapterTitle.style.fontWeight = '600';
-            chapterTitle.style.margin = '1rem 0 0.5rem 0';
-            chapterTitle.textContent = 'Chapitres:';
-            chapterList.appendChild(chapterTitle);
+        // Créer une carte pour chaque matière
+        for (const [subjectName, stats] of Object.entries(subjectStats)) {
+            const subjectCard = document.createElement('div');
+            subjectCard.className = 'subject-card';
             
-            for (const [chapterName, chapterStats] of Object.entries(subjectChapters)) {
-                const chapterItem = document.createElement('div');
-                chapterItem.className = 'chapter-item';
+            // En-tête de la carte
+            const subjectHeader = document.createElement('div');
+            subjectHeader.className = 'subject-header';
+            
+            const subjectNameEl = document.createElement('div');
+            subjectNameEl.className = 'subject-name';
+            subjectNameEl.textContent = subjectName;
+            
+            subjectHeader.appendChild(subjectNameEl);
+            subjectCard.appendChild(subjectHeader);
+            
+            // Grille des stats principales
+            const statsGrid = document.createElement('div');
+            statsGrid.className = 'subject-stats-grid';
+            
+            // Score moyen
+            const avgScoreStat = createSubjectStat(
+                `${(stats.average_score * 100).toFixed(0)}%`, 
+                'Score moyen'
+            );
+            statsGrid.appendChild(avgScoreStat);
+            
+            // Tests complétés
+            const completedStat = createSubjectStat(
+                `${stats.completed}/${stats.count}`, 
+                'Complétés'
+            );
+            statsGrid.appendChild(completedStat);
+            
+            // Taux de complétion
+            /*const completionRate = stats.count > 0 ? (stats.completed / stats.count) * 100 : 0;
+            const completionStat = createSubjectStat(
+                `${completionRate.toFixed(1)}%`, 
+                'Taux de complétion'
+            );
+            statsGrid.appendChild(completionStat);
+            
+            // Barre de progression
+            const progressBar = document.createElement('div');
+            progressBar.className = 'progress-bar';
+            const progressFill = document.createElement('div');
+            progressFill.className = 'progress-fill';
+            progressFill.style.width = `${completionRate}%`;
+            progressBar.appendChild(progressFill);
+            completionStat.appendChild(progressBar);*/
+            
+            subjectCard.appendChild(statsGrid);
+            
+            // Liste des chapitres imbriqués
+            const chapterList = document.createElement('div');
+            chapterList.className = 'chapter-list';
+            
+            const subjectChapters = chapterDistribution[subjectName] || {};
+            
+            if (Object.keys(subjectChapters).length > 0) {
+                const chapterTitle = document.createElement('div');
+                chapterTitle.className = 'chapter-title';
+                chapterTitle.style.fontWeight = '600';
+                chapterTitle.style.margin = '1rem 0 0.5rem 0';
+                chapterTitle.textContent = 'Chapitres:';
+                chapterList.appendChild(chapterTitle);
                 
-                const chapterNameEl = document.createElement('div');
-                chapterNameEl.className = 'chapter-name';
-                chapterNameEl.textContent = chapterName;
-                
-                const chapterStatsEl = document.createElement('div');
-                chapterStatsEl.className = 'chapter-stats';
-                
-                // Score moyen du chapitre
-                const chapterScore = document.createElement('div');
-                chapterScore.className = 'chapter-stat';
-                const scoreValue = document.createElement('div');
-                scoreValue.className = 'chapter-stat-value';
-                scoreValue.textContent = `${(chapterStats.average_score * 100).toFixed(1)}%`;
-                const scoreLabel = document.createElement('div');
-                scoreLabel.className = 'chapter-stat-label';
-                scoreLabel.textContent = 'Score';
-                chapterScore.appendChild(scoreValue);
-                chapterScore.appendChild(scoreLabel);
-                
-                // Tentatives du chapitre
-                const chapterAttempts = document.createElement('div');
-                chapterAttempts.className = 'chapter-stat';
-                const attemptsValue = document.createElement('div');
-                attemptsValue.className = 'chapter-stat-value';
-                attemptsValue.textContent = chapterStats.attempts;
-                const attemptsLabel = document.createElement('div');
-                attemptsLabel.className = 'chapter-stat-label';
-                attemptsLabel.textContent = 'Tentatives';
-                chapterAttempts.appendChild(attemptsValue);
-                chapterAttempts.appendChild(attemptsLabel);
-                
-                chapterStatsEl.appendChild(chapterScore);
-                chapterStatsEl.appendChild(chapterAttempts);
-                
-                chapterItem.appendChild(chapterNameEl);
-                chapterItem.appendChild(chapterStatsEl);
-                chapterList.appendChild(chapterItem);
+                for (const [chapterName, chapterStats] of Object.entries(subjectChapters)) {
+                    const chapterItem = document.createElement('div');
+                    chapterItem.className = 'chapter-item';
+                    
+                    const chapterNameEl = document.createElement('div');
+                    chapterNameEl.className = 'chapter-name';
+                    chapterNameEl.textContent = chapterName;
+                    
+                    const chapterStatsEl = document.createElement('div');
+                    chapterStatsEl.className = 'chapter-stats';
+                    
+                    // Score moyen du chapitre
+                    const chapterScore = document.createElement('div');
+                    chapterScore.className = 'chapter-stat';
+                    const scoreValue = document.createElement('div');
+                    scoreValue.className = 'chapter-stat-value';
+                    scoreValue.textContent = `${(chapterStats.average_score * 100).toFixed(1)}%`;
+                    const scoreLabel = document.createElement('div');
+                    scoreLabel.className = 'chapter-stat-label';
+                    scoreLabel.textContent = 'Score';
+                    chapterScore.appendChild(scoreValue);
+                    chapterScore.appendChild(scoreLabel);
+                    
+                    // Tentatives du chapitre
+                    const chapterAttempts = document.createElement('div');
+                    chapterAttempts.className = 'chapter-stat';
+                    const attemptsValue = document.createElement('div');
+                    attemptsValue.className = 'chapter-stat-value';
+                    attemptsValue.textContent = chapterStats.attempts;
+                    const attemptsLabel = document.createElement('div');
+                    attemptsLabel.className = 'chapter-stat-label';
+                    attemptsLabel.textContent = 'Tentatives';
+                    chapterAttempts.appendChild(attemptsValue);
+                    chapterAttempts.appendChild(attemptsLabel);
+                    
+                    chapterStatsEl.appendChild(chapterScore);
+                    chapterStatsEl.appendChild(chapterAttempts);
+                    
+                    chapterItem.appendChild(chapterNameEl);
+                    chapterItem.appendChild(chapterStatsEl);
+                    chapterList.appendChild(chapterItem);
+                }
             }
+            
+            subjectCard.appendChild(chapterList);
+            container.appendChild(subjectCard);
         }
-        
-        subjectCard.appendChild(chapterList);
-        container.appendChild(subjectCard);
     }
-}
 
-// Fonction utilitaire
-function createSubjectStat(value, label) {
-    const stat = document.createElement('div');
-    stat.className = 'subject-stat';
-    
-    const valueEl = document.createElement('div');
-    valueEl.className = 'subject-stat-value';
-    valueEl.textContent = value;
-    
-    const labelEl = document.createElement('div');
-    labelEl.className = 'subject-stat-label';
-    labelEl.textContent = label;
-    
-    stat.appendChild(valueEl);
-    stat.appendChild(labelEl);
-    return stat;
-}
+    // Fonction utilitaire
+    function createSubjectStat(value, label) {
+        const stat = document.createElement('div');
+        stat.className = 'subject-stat';
+        
+        const valueEl = document.createElement('div');
+        valueEl.className = 'subject-stat-value';
+        valueEl.textContent = value;
+        
+        const labelEl = document.createElement('div');
+        labelEl.className = 'subject-stat-label';
+        labelEl.textContent = label;
+        
+        stat.appendChild(valueEl);
+        stat.appendChild(labelEl);
+        return stat;
+    }
 
     </script>
 </body>

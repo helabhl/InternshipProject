@@ -48,6 +48,8 @@ def create_attempt():
         userID = data.get("userID")
         kidIndex = data.get("kidIndex")
         quizID = data.get("quizID")
+        device_info = data.get("device")   
+
 
         if not all([userID, kidIndex, quizID]):
             return jsonify({"error": "Champs manquants"}), 400
@@ -66,6 +68,7 @@ def create_attempt():
             userID=userID,
             kidIndex=kidIndex,
             quizID=quizID,
+            device=device_info,
             completed=0,
             failed=0,
             abandoned=0
@@ -91,7 +94,6 @@ def create_attempt():
         return jsonify({"error": str(e)}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 @attempts_bp.route('/attempts/<attempt_id>', methods=['PUT'])
 def update_attempt(attempt_id):
@@ -173,8 +175,6 @@ def update_attempt(attempt_id):
         return jsonify({"error": str(e)}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
 
 @attempts_bp.route('/attempts/recalculate_scores', methods=['POST'])
 def recalculate_scores():

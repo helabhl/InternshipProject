@@ -11,7 +11,7 @@ from routes.performances import performance_bp
 from dotenv import load_dotenv
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from flask import Flask
 from flask_cors import CORS
@@ -33,23 +33,24 @@ app.db = client[config.DB_NAME]
 
 
 
-def mark_abandoned_attempts():
-    one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+def mark_timeout_attempts():
+    one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)  # UTC aware
     attempts = AttemptData.objects(
         completed=0,
         failed=0,
-        abandoned=0,
+        aborted=0,
+        timeout = 0,
         start_time__lt=one_hour_ago
     )
     for attempt in attempts:
-        attempt.abandoned = 1
+        attempt.timeout = 1
         attempt.end_time = attempt.start_time + timedelta(hours=1)
         attempt.time_spent = 3600
         attempt.save()
 
 # 🔹 Scheduler qui vérifie toutes les 5 minutes
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=mark_abandoned_attempts, trigger="interval", minutes=5)
+scheduler.add_job(func=mark_timeout_attempts, trigger="interval", minutes=5)
 scheduler.start()
 
 
@@ -94,6 +95,10 @@ def d():
 def api_test():
     return render_template("api_test.html")
 
+
+@app.route("/quiz")
+def quiz():
+    return render_template("quiz.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

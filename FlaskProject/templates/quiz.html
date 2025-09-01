@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حرف الفاء - Quiz</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .quiz-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .screen {
+            padding: 30px;
+            display: none;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        /* شاشة البداية */
+        .start-screen {
+            text-align: center;
+            padding: 50px 30px;
+        }
+        
+        .start-screen h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+        }
+        
+        .start-screen p {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .btn-start {
+            padding: 15px 40px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+        }
+        
+        .btn-start:hover {
+            background-color: #27ae60;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(46, 204, 113, 0.4);
+        }
+        
+        /* رأس الاختبار */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat-box {
+            background-color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            color: #2c3e50;
+        }
+        
+        /* حاوية السؤال */
+        .question-container {
+            padding: 30px;
+        }
+        
+        .question-text {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            line-height: 1.8;
+            text-align: center;
+        }
+        
+        .question-text h2 {
+            margin-bottom: 15px;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .option {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .option:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+            border-color: #3498db;
+        }
+        
+        .option.selected {
+            background-color: #d6eaf8;
+            border-color: #3498db;
+        }
+        
+        .option.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .option.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        /* أزرار التحكم */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 0 30px 30px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background-color: #2980b9;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background-color: #7f8c8d;
+        }
+        
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background-color: #27ae60;
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background-color: #c0392b;
+        }
+        
+        /* التلميح */
+        .hint-container {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+            display: none;
+            text-align: center;
+        }
+        
+        /* شاشة التوقف */
+        .paused-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            display: none;
+            z-index: 10;
+            gap: 20px;
+        }
+        
+        /* شاشة النتيجة */
+        .result-screen {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+        
+        .result-screen.active {
+            display: block;
+        }
+        
+        .result-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .result-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .result-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        /* النتائج */
+        .results-container {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .score {
+            font-size: 2.5rem;
+            margin: 20px 0;
+            color: #2c3e50;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        /* المؤقت */
+        .timer-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+            gap: 10px;
+        }
+        
+        .timer-icon {
+            font-size: 1.5rem;
+            color: #e74c3c;
+        }
+        
+        /* مؤشر التحميل */
+        .loader {
+            border: 5px solid 'f3f3f3';
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* رسائل حالة API */
+        .api-status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+        
+        .api-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .api-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* نصوص عربية */
+        .arabic-text {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 2;
+        }
+        
+        .purple-text {
+            color: #9933ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <!-- شاشة البداية -->
+        <div class="screen start-screen active">
+            <h1>حرف الفاء - Quiz</h1>
+            <p>اختبار معرفتك بحرف الفاء في اللغة العربية</p>
+            <p>سيتم تتبع إجاباتك وتسجيلها</p>
+            <div class="api-status" id="api-status"></div>
+            <button class="btn-start" id="start-btn">بدء الاختبار</button>
+        </div>
+        
+        <!-- شاشة التحميل -->
+        <div class="screen loading-screen">
+            <div class="loader"></div>
+            <p class="arabic-text" style="text-align: center; margin-top: 20px;">جاري تحميل الأسئلة...</p>
+        </div>
+        
+        <!-- شاشة الاختبار -->
+        <div class="screen quiz-screen">
+            <div class="timer-container">
+                <div class="timer-icon">⏱️</div>
+                <div class="stat-value">الوقت على السؤال: <span id="question-timer">00:00</span></div>
+            </div>
+            
+            <div class="question-container">
+                <div class="question-text arabic-text" id="question">سيظهر السؤال هنا</div>
+                
+                <div class="options-container" id="options-container">
+                    <!-- سيتم إنشاء الخيارات ديناميكيًا -->
+                </div>
+                
+                <div class="hint-container" id="hint-container">
+                    <strong>تلميح:</strong> <span id="hint-text"></span>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="hint-btn" class="btn-secondary">تلميح</button>
+                <button id="confirm-btn" class="btn-success" disabled>✅ تأكيد الإجابة</button>
+                <button id="pause-btn" class="btn-secondary">⏸️ إيقاف مؤقت</button>
+            </div>
+            
+            <div class="api-status" id="quiz-api-status"></div>
+        </div>
+        
+        <!-- شاشة التوقف المؤقت -->
+        <div class="paused-overlay" id="paused-overlay">
+            <h2>الاختبار متوقف مؤقتًا</h2>
+            <p>تم إيقاف المؤقت مؤقتًا</p>
+            <div class="result-buttons">
+                <button id="resume-btn" class="btn-success">▶️ استئناف</button>
+                <button id="restart-quiz-btn" class="btn-primary">🔄 إعادة الاختبار</button>
+                <button id="abandon-quiz-btn" class="btn-danger">🚫 التخلي عن الاختبار</button>
+            </div>
+        </div>
+        
+        <!-- شاشة الإجابة الصحيحة -->
+        <div class="screen correct-result-screen">
+            <div class="result-icon">✅</div>
+            <h2 class="result-title">إجابة صحيحة!</h2>
+            <p>أحسنت! لقد أجبت بشكل صحيح.</p>
+            <div class="result-buttons">
+                <button id="next-question-btn" class="btn-primary">السؤال التالي →</button>
+            </div>
+        </div>
+        
+        <!-- شاشة الإجابة الخاطئة -->
+        <div class="screen incorrect-result-screen">
+            <div class="result-icon">❌</div>
+            <h2 class="result-title">إجابة خاطئة!</h2>
+            <p>للأسف، هذه الإجابة غير صحيحة.</p>
+            <div class="result-buttons">
+                <button id="retry-btn" class="btn-secondary">🔄 حاول مرة أخرى</button>
+            </div>
+        </div>
+        
+        <!-- شاشة النتائج النهائية -->
+        <div class="screen results-screen">
+            <h2>تم الانتهاء من الاختبار!</h2>
+            <div class="score">نتيجتك: <span id="final-score">0</span>/<span id="max-score">5</span></div>
+            
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            
+            <p id="result-end-message">تهانينا على إكمال الاختبار!</p>
+            <button id="restart-btn" class="btn-primary">إعادة الاختبار</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:5000';
+        const USER_ID = '+14388864855';
+        const KID_INDEX = '0';
+        const QUIZ_ID = '68b1b251055bd8e52b27d107';
+        
+        // Variables globales
+        let quizData = [];
+        let finalScore = 0;
+        
+        // Éléments DOM
+        const startScreen = document.querySelector('.start-screen');
+        const loadingScreen = document.querySelector('.loading-screen');
+        const quizScreen = document.querySelector('.quiz-screen');
+        const resultsScreen = document.querySelector('.results-screen');
+        const correctResultScreen = document.querySelector('.correct-result-screen');
+        const incorrectResultScreen = document.querySelector('.incorrect-result-screen');
+        const questionElement = document.getElementById('question');
+        const optionsContainer = document.getElementById('options-container');
+        const hintContainer = document.getElementById('hint-container');
+        const hintTextElement = document.getElementById('hint-text');
+        const hintButton = document.getElementById('hint-btn');
+        const confirmButton = document.getElementById('confirm-btn');
+        const pauseButton = document.getElementById('pause-btn');
+        const resumeButton = document.getElementById('resume-btn');
+        const restartQuizButton = document.getElementById('restart-quiz-btn');
+        const abandonQuizButton = document.getElementById('abandon-quiz-btn');
+        const nextQuestionButton = document.getElementById('next-question-btn');
+        const retryButton = document.getElementById('retry-btn');
+        const restartButton = document.getElementById('restart-btn');
+        const startButton = document.getElementById('start-btn');
+        const questionTimerElement = document.getElementById('question-timer');
+        const finalScoreElement = document.getElementById('final-score');
+        const maxScoreElement = document.getElementById('max-score');
+        const progressElement = document.getElementById('progress');
+        const resultEndMessage = document.getElementById('result-end-message');
+        const pausedOverlay = document.getElementById('paused-overlay');
+        const apiStatusElement = document.getElementById('api-status');
+        const quizApiStatusElement = document.getElementById('quiz-api-status');
+
+        // Variables d'état du quiz
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let totalTimeElapsed = 0;
+        let questionTimeElapsed = 0;
+        let questionTimerInterval;
+        let isPaused = false;
+        let hintUsed = false;
+        let attemptId = null;
+        let selectedOptionIndex = null;
+        let questionAttempts = 0;
+        let isAnswerConfirmed = false;
+
+        // Fonctions API
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+            
+            if (data && (method === 'POST' || method === 'PUT')) {
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('Erreur API:', error);
+                showApiStatus('خطأ في الاتصال بالخادم', 'error');
+                return null;
+            }
+        }
+
+        function showApiStatus(message, type = 'success') {
+            const statusElement = quizScreen.contains(document.activeElement) ? quizApiStatusElement : apiStatusElement;
+            statusElement.textContent = message;
+            statusElement.className = 'api-status ' + (type === 'success' ? 'api-success' : 'api-error');
+            statusElement.style.display = 'block';
+            
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 3000);
+        }
+
+        // Récupérer les données du quiz depuis l'API
+        async function fetchQuizData() {
+            const result = await apiCall(`/quiz/${QUIZ_ID}`, 'GET');
+            
+            if (result && result.questions) {
+                // Transformer les données de l'API en format utilisable par notre quiz
+                quizData = result.questions.map(q => {
+                    // Trouver l'index de la réponse correcte
+                    let correctAnswerIndex = -1;
+                    const options = q.suggestions.map((s, index) => {
+                        if (s.is_right) {
+                            correctAnswerIndex = index;
+                        }
+                        return s.txt.replace(/<[^>]*>/g, ''); // Nettoyer le HTML
+                    });
+                    
+                    return {
+                        question: q.txt,
+                        options: options,
+                        correctAnswer: correctAnswerIndex,
+                        hint: q.hint
+                    };
+                });
+                
+                return true;
+            }
+            
+            return false;
+        }
+
+        async function createAttempt() {
+            const deviceType = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                ? 'mobile' : 'desktop';
+            
+            const data = {
+                userID: USER_ID,
+                kidIndex: KID_INDEX,
+                quizID: QUIZ_ID,
+                deviceType: deviceType,
+                device: navigator.userAgent
+            };
+            
+            const result = await apiCall('/create-attempt', 'POST', data);
+            
+            if (result && result.attempt_id) {
+                attemptId = result.attempt_id;
+                return true;
+            }
+            
+            return false;
+        }
+
+        async function updateAttempt(data) {
+            if (!attemptId) return false;
+            
+            const result = await apiCall('/update-attempt', 'POST', {
+                attempt_id: attemptId,
+                ...data
+            });
+            
+            return result !== null;
+        }
+
+        async function abandonAttempt() {
+            if (!attemptId) return false;
+            
+            const result = await apiCall('/attempts/abandon', 'POST', {attempt_id: attemptId});
+            return result !== null;
+        }
+
+        // Récupérer le score final depuis le backend
+        async function getFinalScore() {
+            if (!attemptId) return 0;
+            
+            const result = await apiCall(`/attempts/${attemptId}`, 'GET');
+            
+            if (result && result.score !== undefined) {
+                return result.score;
+            }
+            
+            return 0;
+        }
+
+        // Formater le temps en minutes:secondes
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Initialisation du quiz
+        async function initQuiz() {
+            // Afficher un indicateur de chargement
+            startButton.disabled = true;
+            startButton.textContent = 'جاري التحميل...';
+            
+            // Afficher l'écran de chargement
+            startScreen.classList.remove('active');
+            loadingScreen.classList.add('active');
+            
+            // Récupérer les données du quiz depuis l'API
+            const quizLoaded = await fetchQuizData();
+            
+            if (!quizLoaded) {
+                // Revenir à l'écran de démarrage en cas d'erreur
+                loadingScreen.classList.remove('active');
+                startScreen.classList.add('active');
+                startButton.disabled = false;
+                startButton.textContent = 'بدء الاختبار';
+                showApiStatus('خطأ في تحميل الأسئلة', 'error');
+                return;
+            }
+            
+            // Créer la tentative via l'API
+            const created = await createAttempt();
+            
+            if (!created) {
+                loadingScreen.classList.remove('active');
+                startScreen.classList.add('active');
+                startButton.disabled = false;
+                startButton.textContent = 'بدء الاختبار';
+                showApiStatus('خطأ في إنشاء المحاولة', 'error');
+                return;
+            }
+            
+            // Initialiser les variables du quiz
+            currentQuestionIndex = 0;
+            questionTimeElapsed = 0;
+            questionTimerElement.textContent = '00:00';
+            maxScoreElement.textContent = quizData.length;
+            
+            // Afficher l'écran de quiz
+            loadingScreen.classList.remove('active');
+            quizScreen.classList.add('active');
+            
+            // Charger la première question
+            await loadQuestion();
+            startTimer();
+        }
+
+        // Charger une question
+        async function loadQuestion() {
+            const currentQuestion = quizData[currentQuestionIndex];
+            questionElement.innerHTML = currentQuestion.question;
+            
+            // Réinitialiser l'indice et les compteurs
+            hintContainer.style.display = 'none';
+            hintUsed = false;
+            selectedOptionIndex = null;
+            isAnswerConfirmed = false;
+            questionAttempts = 0;
+            questionTimeElapsed = 0;
+            questionTimerElement.textContent = '00:00';
+            
+            // Masquer les écrans de résultat
+            correctResultScreen.classList.remove('active');
+            incorrectResultScreen.classList.remove('active');
+            
+            // Désactiver le bouton de confirmation
+            confirmButton.disabled = true;
+            
+            // Vider les options précédentes
+            optionsContainer.innerHTML = '';
+            
+            // Ajouter les nouvelles options
+            currentQuestion.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option', 'arabic-text');
+                optionElement.innerHTML = option;
+                optionElement.dataset.index = index;
+                optionElement.addEventListener('click', selectOption);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Notifier l'API que la question commence
+            await updateAttempt({
+                question_index: currentQuestionIndex,
+                is_starting: true
+            });
+        }
+
+        // Démarrer les chronomètres
+        function startTimer() {            
+            // Chronomètre par question
+            clearInterval(questionTimerInterval);
+            questionTimerInterval = setInterval(() => {
+                if (!isPaused) {
+                    questionTimeElapsed++;
+                    questionTimerElement.textContent = formatTime(questionTimeElapsed);
+                }
+            }, 1000);
+        }
+
+        // Sélectionner une option
+        function selectOption(e) {
+            if (isPaused || isAnswerConfirmed) return;
+            
+            // Réinitialiser la sélection précédente
+            const options = optionsContainer.querySelectorAll('.option');
+            options.forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Sélectionner la nouvelle option
+            selectedOptionIndex = parseInt(e.target.dataset.index);
+            e.target.classList.add('selected');
+            
+            // Activer le bouton de confirmation
+            confirmButton.disabled = false;
+        }
+
+        // Confirmer la réponse
+        async function confirmAnswer() {
+            if (isPaused || selectedOptionIndex === null || isAnswerConfirmed) return;
+            
+            const correctAnswerIndex = quizData[currentQuestionIndex].correctAnswer;
+            const options = optionsContainer.querySelectorAll('.option');
+            const isCorrect = selectedOptionIndex === correctAnswerIndex;
+            
+            // Désactiver toutes les options
+            options.forEach(option => {
+                option.style.pointerEvents = 'none';
+            });
+            
+            // Masquer l'écran de quiz et afficher le bon écran de résultat
+            quizScreen.classList.remove('active');
+            if (isCorrect) {
+                correctResultScreen.classList.add('active');
+            } else {
+                incorrectResultScreen.classList.add('active');
+            }
+            
+            confirmButton.disabled = true;
+            isAnswerConfirmed = true;
+            questionAttempts++;
+    
+            // Notifier l'API avec une vraie sous-tentative
+            await updateAttempt({
+                question_index: currentQuestionIndex,
+                is_correct: isCorrect ? 1 : 0,
+                is_wrong: isCorrect ? 0 : 1,
+                response_value: quizData[currentQuestionIndex].options[selectedOptionIndex],
+                is_starting: false
+            });
+        }
+
+        // Passer à la question suivante
+        async function nextQuestion() {
+            correctResultScreen.classList.remove('active');
+            
+            // Si la réponse est correcte, passer à la question suivante
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < quizData.length) {
+                quizScreen.classList.add('active');
+                await loadQuestion();
+            } else {
+                await finishQuiz();
+            }
+        }
+
+        // Réessayer la même question
+        async function retryQuestion() {
+            incorrectResultScreen.classList.remove('active');
+            quizScreen.classList.add('active');
+            await loadQuestion();
+        }
+
+        // Afficher l'indice
+        async function showHint() {
+            if (hintUsed || isPaused || isAnswerConfirmed) return;
+            
+            hintTextElement.textContent = quizData[currentQuestionIndex].hint || "لا توجد تلميحات متاحة لهذا السؤال";
+            hintContainer.style.display = 'block';
+            hintUsed = true;
+            
+            // Notifier l'API que l'indice est utilisé
+            await updateAttempt({
+                question_index: currentQuestionIndex,
+                hint_used: 1,
+                is_starting: false
+            });
+        }
+
+        // Mettre en pause le quiz        
+        function pauseQuiz() {
+            isPaused = true;
+            pausedOverlay.style.display = 'flex';
+        }
+
+        // Reprendre le quiz
+        function resumeQuiz() {
+            isPaused = false;
+            pausedOverlay.style.display = 'none';
+        }
+
+        // Redémarrer le quiz
+        function restartQuizFromPause() {
+            isPaused = false;
+            pausedOverlay.style.display = 'none';
+            restartQuiz();
+        }
+
+        // Abandonner le quiz depuis le menu pause
+        async function abandonQuizFromPause() {
+            if (confirm("هل أنت متأكد من أنك تريد التخلي عن الاختبار؟")) {
+                // Notifier l'API de l'abandon
+                await abandonAttempt();
+                await finishQuiz();
+            }
+        }
+
+        // Terminer le quiz
+        async function finishQuiz() {
+            clearInterval(questionTimerInterval);
+            
+            // Récupérer le score final depuis le backend
+            finalScore = await getFinalScore();
+            
+            resultsScreen.classList.add('active');
+            
+            // Afficher le score final récupéré du backend
+            finalScoreElement.textContent = finalScore;
+            
+            // Mettre à jour la barre de progression
+            const progressPercent = (finalScore / quizData.length) * 100;
+            progressElement.style.width = `${progressPercent}%`;
+            
+            // Afficher un message personnalisé selon le score
+            const scorePercentage = finalScore / quizData.length;
+            if (scorePercentage >= 0.8) {
+                resultEndMessage.textContent = "ممتاز! أنت تتقن هذه المواضيع بشكل مثالي!";
+            } else if (scorePercentage >= 0.5) {
+                resultEndMessage.textContent = "نتيجة جيدة! لديك معرفة جيدة.";
+            } else {
+                resultEndMessage.textContent = "استمر في التعلم، سوف تتحسن!";
+            }
+        }
+
+        // Redémarrer le quiz
+        function restartQuiz() {
+            resultsScreen.classList.remove('active');
+            correctResultScreen.classList.remove('active');
+            incorrectResultScreen.classList.remove('active');
+            startScreen.classList.add('active');
+            startButton.disabled = false;
+            startButton.textContent = 'بدء الاختبار';
+        }
+
+        // Événements
+        startButton.addEventListener('click', initQuiz);
+        hintButton.addEventListener('click', showHint);
+        confirmButton.addEventListener('click', confirmAnswer);
+        pauseButton.addEventListener('click', pauseQuiz);
+        resumeButton.addEventListener('click', resumeQuiz);
+        restartQuizButton.addEventListener('click', restartQuizFromPause);
+        abandonQuizButton.addEventListener('click', abandonQuizFromPause);
+        nextQuestionButton.addEventListener('click', nextQuestion);
+        retryButton.addEventListener('click', retryQuestion);
+        restartButton.addEventListener('click', restartQuiz);
+    </script>
+</body>
+</html>

@@ -15,12 +15,6 @@ class QuestionAttempt(EmbeddedDocument):
     start_time = DateTimeField()
     end_time = DateTimeField()
     duration = IntField(min_value=0, default=0)
-
-    # Métadonnées
-    response_value = StringField()
-    # Facultatif (utile pour analyse)
-    auto_corrected = BooleanField(default=False)                      # si une correction auto a été appliquée
-
     
 # =========================
 # Réponse à une question (global pour la question)
@@ -42,9 +36,7 @@ class Answer(EmbeddedDocument):
 
 
     # Métadonnées
-    skipped = BooleanField(default=False)                             # question passée
     attempts_count = IntField(default=0)                              # nb de tentatives sur la question
-    question_id = ObjectIdField()                                     # référence à la question (dans Quiz/Question)
 
 
 class AttemptData(Document):
@@ -62,29 +54,25 @@ class AttemptData(Document):
     answers = ListField(EmbeddedDocumentField(Answer))                # liste des réponses
 
     # Statistiques
-    total_attempts = IntField(default=0)                              # nb de tentatives 
+    attempts_count = IntField(default=0)                              # nb de tentatives 
     answered_questions = IntField(default=0)
-    score = FloatField(default=0.0)                                   # score global
     success_rate = FloatField(default=0.0)                            # ratio de réussite pondéré
+    score = FloatField(default=0.0)                                   # score global
+
 
     failed = IntField(default=0)                                      
     completed = IntField(default=0)                                  
     aborted = IntField(default=0) 
     timeout = IntField(default=0) 
 
-    aborted_reason = StringField(choices=("closed_app", "quit_button", "lost_connection"), null=True)
-    timeout_reason = StringField(choices=("inactivity", "cron", "session_expired"), null=True)
-
     # Appareil
     deviceType = StringField()                                        # mobile / desktop / tablet
     device = StringField()                                            # OS ou modèle
 
-    # Tracking avancé
-    session_id = StringField()                                        # id unique de session
 
     # Audit
-    created_at = DateTimeField(default=datetime.now(timezone.utc))
-    updated_at = DateTimeField(default=datetime.now(timezone.utc))
+    created_at = DateTimeField()  
+    updated_at = DateTimeField()  
 
     meta = {
         'collection': 'attemptsdata',

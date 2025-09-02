@@ -1,4 +1,5 @@
 # routes/quiz_attempts.py
+from math import log
 from flask import Blueprint, request, jsonify
 from models.attempt import AttemptData, QuestionAttempt
 from models.quiz import Quiz
@@ -17,12 +18,13 @@ def mongo_to_dict(obj):
         data["quizID"] = str(data["quizID"])
     return data
 
-def calculate_score(answers, min_time=60, max_time=300):
+def calculate_score(answers, attempts_count, min_time=0, max_time=90):
     num_questions = len(answers)
     if num_questions == 0:
         return 0.0
 
     sum_success_rate = 0
+    sum_speed = 0
     for ans in answers:
         t = ans.time_per_question or 0  # éviter None
 
@@ -40,10 +42,12 @@ def calculate_score(answers, min_time=60, max_time=300):
         denominator = ans.wrong_answer + ans.hint_used + 1  # éviter /0
         success = numerator / denominator
 
-        sum_success_rate += 0.8*success+0.2*ans.correct_answer*speed
-
-    avg_success_rate = sum_success_rate /num_questions
-    return avg_success_rate
+        sum_success_rate += success 
+        sum_speed+=ans.correct_answer*speed 
+    avg_success_rate =   sum_success_rate /num_questions 
+    avg_speed= sum_speed /num_questions 
+    score = 0.7 * avg_success_rate + 0.2 * avg_speed + 0.1 * (1 / (1 + 0.5* log(attempts_count)))
+    return score
 
 @attempts_bp.route('/create-attempt', methods=['POST'])
 def create_attempt():
@@ -70,10 +74,12 @@ def create_attempt():
 
         stats = AttemptData.objects(userID=userID, kidIndex=kidIndex, quizID=quizID).first()
         if not stats:
-            stats = AttemptData(userID=userID, kidIndex=kidIndex, quizID=quizID, total_attempts=0)
+            stats = AttemptData(userID=userID, kidIndex=kidIndex, quizID=quizID, attempts_count=0)
 
         # Incrémenter le compteur global
-        stats.total_attempts += 1
+        stats.attempts_count += 1
+
+        now = datetime.now(timezone.utc)
 
         # Création de la tentative
         attempt = AttemptData(
@@ -82,14 +88,12 @@ def create_attempt():
             quizID=quizID,
             deviceType=deviceType,
             device=device,
-            total_attempts=stats.total_attempts
+            attempts_count=stats.attempts_count,
+            created_at=now
         )
+
         attempt.init_answers(num_questions)
-        now = datetime.now(timezone.utc)
         attempt.start_time = now
-
-
-        
 
         attempt.save()
 
@@ -119,7 +123,6 @@ def update_attempt():
         hint_used = int(data.get("hint_used", 0))
         is_wrong = int(data.get("is_wrong", 0))
         is_starting = bool(data.get("is_starting", False))
-        response_value = data.get("response_value", "")
 
         # Vérif id valide
         if not ObjectId.is_valid(attempt_id):
@@ -153,7 +156,6 @@ def update_attempt():
                 is_wrong=0,
                 hint_used=0,
                 start_time=now,
-                response_value=""
             )
             answer.start_time = now  # global start pour la question
             answer.attempts.append(qa)
@@ -168,7 +170,6 @@ def update_attempt():
             qa.is_correct = is_correct
             qa.is_wrong = is_wrong
             qa.hint_used = hint_used
-            qa.response_value = response_value
             qa.duration = int((to_utc_aware(now) - to_utc_aware(qa.start_time)).total_seconds())
 
             # Mise à jour des agrégats Answer
@@ -196,7 +197,7 @@ def update_attempt():
             attempt.duration = int((to_utc_aware(attempt.end_time) - to_utc_aware(attempt.start_time)).total_seconds())
         attempt.updated_at = now
 
-        attempt.score = calculate_score(attempt.answers, 60, 300)
+        attempt.score = calculate_score(attempt.answers,attempt.attempts_count, 0, 90)
 
         attempt.save()
 

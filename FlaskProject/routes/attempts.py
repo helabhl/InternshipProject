@@ -26,7 +26,7 @@ def calculate_score(answers, attempts_count, min_time=0, max_time=90):
     sum_success_rate = 0
     sum_speed = 0
     for ans in answers:
-        t = ans.time_per_question or 0  # éviter None
+        t = ans.duration or 0  # éviter None
 
         # Calcul du speed (borné entre 0 et 1)
         if t < min_time:
@@ -46,7 +46,7 @@ def calculate_score(answers, attempts_count, min_time=0, max_time=90):
         sum_speed+=ans.correct_answer*speed 
     avg_success_rate =   sum_success_rate /num_questions 
     avg_speed= sum_speed /num_questions 
-    score = 0.7 * avg_success_rate + 0.2 * avg_speed + 0.1 * (1 / (1 + 0.5* log(attempts_count)))
+    score = 0.7 * avg_success_rate + 0.2 * avg_speed + 0.1 * (1 / (1 +  log(attempts_count)))
     return score
 
 @attempts_bp.route('/create-attempt', methods=['POST'])
@@ -123,6 +123,7 @@ def update_attempt():
         hint_used = int(data.get("hint_used", 0))
         is_wrong = int(data.get("is_wrong", 0))
         is_starting = bool(data.get("is_starting", False))
+        duration= int(data.get("duration", 0))
 
         # Vérif id valide
         if not ObjectId.is_valid(attempt_id):
@@ -170,7 +171,7 @@ def update_attempt():
             qa.is_correct = is_correct
             qa.is_wrong = is_wrong
             qa.hint_used = hint_used
-            qa.duration = int((to_utc_aware(now) - to_utc_aware(qa.start_time)).total_seconds())
+            qa.duration = duration
 
             # Mise à jour des agrégats Answer
             answer.end_time = now
@@ -178,7 +179,7 @@ def update_attempt():
             answer.correct_answer = sum(a.is_correct for a in answer.attempts)
             answer.wrong_answer = sum(a.is_wrong for a in answer.attempts)
             answer.hint_used = sum(a.hint_used for a in answer.attempts)
-            answer.time_per_question = sum(a.duration for a in answer.attempts)
+            answer.duration = sum(a.duration for a in answer.attempts)
 
         # 🔄 Stats globales
         correct_answers = sum(answer.correct_answer for answer in attempt.answers)
@@ -194,7 +195,7 @@ def update_attempt():
 
         # Durée totale du quiz
         if attempt.start_time and attempt.end_time:
-            attempt.duration = int((to_utc_aware(attempt.end_time) - to_utc_aware(attempt.start_time)).total_seconds())
+            attempt.duration = sum(answer.duration for answer in attempt.answers)
         attempt.updated_at = now
 
         attempt.score = calculate_score(attempt.answers,attempt.attempts_count, 0, 90)

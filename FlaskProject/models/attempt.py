@@ -32,13 +32,10 @@ class Answer(EmbeddedDocument):
     # Temps de réponse
     start_time = DateTimeField()                                      # début de la question
     end_time = DateTimeField()                                        # fin de la question
-    time_per_question = IntField(min_value=0, default=0)              # durée totale (s)
+    duration = IntField(min_value=0, default=0)              # durée totale (s)
 
 
-    # Métadonnées
-    attempts_count = IntField(default=0)                              # nb de tentatives sur la question
-
-
+    
 class AttemptData(Document):
     # Contexte utilisateur
     userID = StringField(required=True)                               # ID parent/tuteur

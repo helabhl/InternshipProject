@@ -47,7 +47,7 @@ def calculate_score(answers, attempts_count, min_time=0, max_time=90):
     avg_success_rate =   sum_success_rate /num_questions 
     avg_speed= sum_speed /num_questions 
     score = 0.7 * avg_success_rate + 0.2 * avg_speed + 0.1 * (1 / (1 +  log(attempts_count)))
-    return score
+    return score, avg_success_rate
 
 @attempts_bp.route('/create-attempt', methods=['POST'])
 def create_attempt():
@@ -110,11 +110,7 @@ def create_attempt():
 @attempts_bp.route('/update-attempt', methods=['POST'])
 def update_attempt():
     try:
-        def to_utc_aware(dt):
-            """Convertir datetime naïf en UTC aware"""
-            if dt and dt.tzinfo is None:
-                return dt.replace(tzinfo=timezone.utc)
-            return dt
+        
 
         data = request.get_json()
         attempt_id = data.get("attempt_id")
@@ -193,12 +189,13 @@ def update_attempt():
             attempt.end_time = now
 
 
-        # Durée totale du quiz
-        if attempt.start_time and attempt.end_time:
-            attempt.duration = sum(answer.duration for answer in attempt.answers)
+        attempt.duration = sum(answer.duration for answer in attempt.answers)
         attempt.updated_at = now
 
-        attempt.score = calculate_score(attempt.answers,attempt.attempts_count, 0, 90)
+        attempt.score = calculate_score(attempt.answers,attempt.attempts_count, 0, 90)[0]
+        attempt.success_rate = calculate_score(attempt.answers,attempt.attempts_count, 0, 90)[1]
+        attempt.answered_questions = correct_answers
+
 
         attempt.save()
 

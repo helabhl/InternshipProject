@@ -512,9 +512,9 @@ def get_performance(user_id,kidIndex):
                 "end_time": att.end_time,
                 "completed": att.completed,
                 "failed": att.failed,
-                "abandoned": att.abandoned,
+                "abandoned": att.aborted,
                 "score": getattr(att, "score", None),
-                "time_spent": (att.end_time - att.start_time).total_seconds() if att.end_time else 0
+                "duration": att.duration 
             })
         df = pd.DataFrame(data)
 

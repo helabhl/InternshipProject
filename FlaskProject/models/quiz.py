@@ -37,7 +37,7 @@ class Layer(EmbeddedDocument):
 
 
 class Quiz(Document):
-    key = StringField(required=True, unique=True)
+    key = StringField(required=True)
     teacherID = StringField()
     title = StringField()
     version = IntField()

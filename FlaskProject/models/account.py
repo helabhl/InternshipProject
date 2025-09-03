@@ -72,9 +72,9 @@ class User(EmbeddedDocument):
 class AccountData(Document):
     userID = StringField(required=True, unique=True)
     # phone, email, mot de passe : new fields (, unique=True)
-    phone = StringField(required=True)
-    email = StringField(required=True)
-    password_hash = StringField(required=True)
+    # phone = StringField(required=True)
+    # email = StringField(required=True)
+    # password_hash = StringField(required=True)
     kids = MapField(EmbeddedDocumentField(User), default={})
     Active_Sessions = EmbeddedDocumentField(ActiveSessions, default=ActiveSessions)
     authenticationType = StringField()

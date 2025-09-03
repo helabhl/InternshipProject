@@ -25,7 +25,7 @@
             <h6>Please enter the one time password <br> to verify your account</h6>
             <div> 
                 <span>A code has been sent to</span> 
-                <small id="maskedNumber">*******{{ session.get('phone', '')[-4:] }}</small> 
+                <small id="maskedNumber">*******{{ session.get('userID', '')[-4:] }}</small> 
             </div>
 
             <form method="POST" action="{{ url_for('auth.verify') }}">

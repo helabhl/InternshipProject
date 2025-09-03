@@ -84,21 +84,20 @@ def home():
 
 @app.route("/dashboard")
 def dd():
-    return render_template("users/base.html")
+    return render_template("users/dashboard.html")
 
-
-@app.route("/")
-def d():
-    return render_template("users/dash.html")
-
-@app.route("/api-test")
-def api_test():
-    return render_template("api_test.html")
+@app.route("/quizzes")
+def quizzes():
+    return render_template("users/quiz.html")
 
 
 @app.route("/quiz")
 def quiz():
     return render_template("quiz.html")
+
+@app.route("/subject")
+def subject():
+    return render_template("users/subjects.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

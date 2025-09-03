@@ -4,18 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>حرف الفاء - Quiz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        :root {
+            --primary: #6a11cb;
+            --primary-light: #8a36f5;
+            --secondary: #2575fc;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #3498db;
+            --light: #f8f9fa;
+            --dark: #2c3e50;
+            --gray: #7f8c8d;
+            --white: #ffffff;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            --card-hover: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: #333;
-            line-height: 1.6;
+            line-height: 1.8;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -26,11 +44,17 @@
         .quiz-container {
             width: 100%;
             max-width: 800px;
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            background-color: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
             overflow: hidden;
             position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .quiz-container:hover {
+            box-shadow: var(--card-hover);
+            transform: translateY(-5px);
         }
         
         .screen {
@@ -40,43 +64,59 @@
         
         .active {
             display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         /* شاشة البداية */
         .start-screen {
             text-align: center;
             padding: 50px 30px;
+            background: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), 
+                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%236a11cb" opacity="0.1" width="100" height="100"/><path fill="%232575fc" opacity="0.2" d="M30,30L70,70M70,30L30,70"/></svg>');
+            background-size: 300px;
         }
         
         .start-screen h1 {
-            color: #2c3e50;
+            color: var(--primary);
             margin-bottom: 20px;
-            font-size: 2.5rem;
+            font-size: 2.8rem;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
         
         .start-screen p {
-            color: #7f8c8d;
+            color: var(--gray);
             margin-bottom: 30px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .btn-start {
-            padding: 15px 40px;
-            background-color: #2ecc71;
+            padding: 16px 45px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             border: none;
             border-radius: 50px;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+            box-shadow: 0 6px 15px rgba(106, 17, 203, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .btn-start:hover {
-            background-color: #27ae60;
             transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(46, 204, 113, 0.4);
+            box-shadow: 0 10px 25px rgba(106, 17, 203, 0.5);
         }
         
         /* رأس الاختبار */
@@ -84,35 +124,38 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
-            background-color: #f8f9fa;
+            padding: 20px 30px;
+            background-color: var(--light);
             border-bottom: 1px solid #e9ecef;
         }
         
         .stats {
             display: flex;
-            gap: 20px;
+            gap: 15px;
         }
         
         .stat-box {
-            background-color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background-color: var(--white);
+            padding: 12px 18px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
             font-weight: bold;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-width: 80px;
         }
         
         .stat-label {
             font-size: 0.8rem;
-            color: #7f8c8d;
+            color: var(--gray);
+            margin-bottom: 5px;
         }
         
         .stat-value {
-            font-size: 1.2rem;
-            color: #2c3e50;
+            font-size: 1.3rem;
+            color: var(--primary);
+            font-weight: 800;
         }
         
         /* حاوية السؤال */
@@ -121,15 +164,16 @@
         }
         
         .question-text {
-            font-size: 1.4rem;
-            margin-bottom: 25px;
-            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: var(--dark);
             line-height: 1.8;
             text-align: center;
-        }
-        
-        .question-text h2 {
-            margin-bottom: 15px;
+            font-weight: 600;
+            padding: 20px;
+            background-color: var(--light);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
         
         .options-container {
@@ -139,37 +183,62 @@
         }
         
         .option {
-            padding: 15px 20px;
-            background-color: #f8f9fa;
+            padding: 18px 25px;
+            background-color: var(--white);
             border: 2px solid #e9ecef;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 1.1rem;
-            text-align: center;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
         }
         
         .option:hover {
-            background-color: #e9ecef;
+            background-color: #f0f7ff;
             transform: translateY(-2px);
-            border-color: #3498db;
+            border-color: var(--primary-light);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
         }
         
         .option.selected {
-            background-color: #d6eaf8;
-            border-color: #3498db;
+            background-color: #e6f7ff;
+            border-color: var(--info);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.2);
         }
         
         .option.correct {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
+            background-color: #e8f5e9;
+            border-color: var(--success);
+            color: #2e7d32;
+            box-shadow: 0 6px 12px rgba(46, 204, 113, 0.2);
         }
         
         .option.incorrect {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
+            background-color: #ffebee;
+            border-color: var(--danger);
+            color: #c62828;
+            box-shadow: 0 6px 12px rgba(231, 76, 60, 0.2);
+        }
+        
+        .option-number {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        .option.selected .option-number {
+            background-color: var(--info);
         }
         
         /* أزرار التحكم */
@@ -179,72 +248,93 @@
             margin-top: 20px;
             padding: 0 30px 30px;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
         }
         
         button {
-            padding: 12px 25px;
+            padding: 14px 28px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
+            font-size: 1rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
         button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
         }
         
         .btn-primary {
-            background-color: #3498db;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
         }
         
         .btn-primary:hover:not(:disabled) {
-            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(106, 17, 203, 0.4);
         }
         
         .btn-secondary {
-            background-color: #95a5a6;
-            color: white;
+            background-color: #ecf0f1;
+            color: #7f8c8d;
         }
         
         .btn-secondary:hover:not(:disabled) {
-            background-color: #7f8c8d;
+            background-color: #dfe6e9;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(127, 140, 141, 0.3);
         }
         
         .btn-success {
-            background-color: #2ecc71;
+            background: linear-gradient(135deg, var(--success) 0%, #27ae60 100%);
             color: white;
         }
         
         .btn-success:hover:not(:disabled) {
-            background-color: #27ae60;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(46, 204, 113, 0.4);
         }
         
         .btn-danger {
-            background-color: #e74c3c;
+            background: linear-gradient(135deg, var(--danger) 0%, #c0392b 100%);
             color: white;
         }
         
         .btn-danger:hover:not(:disabled) {
-            background-color: #c0392b;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #e67e22 100%);
+            color: white;
+        }
+        
+        .btn-warning:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(243, 156, 18, 0.4);
         }
         
         /* التلميح */
         .hint-container {
             margin-top: 20px;
-            padding: 15px;
-            background-color: #fff3cd;
-            border-left: 4px solid #ffc107;
-            border-radius: 4px;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+            border-left: 5px solid var(--warning);
+            border-radius: 12px;
             display: none;
-            text-align: center;
+            text-align: right;
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.2);
+            animation: fadeIn 0.5s ease;
         }
         
         /* شاشة التوقف */
@@ -254,14 +344,16 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.95);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             display: none;
             z-index: 10;
-            gap: 20px;
+            gap: 25px;
+            padding: 30px;
+            text-align: center;
         }
         
         /* شاشة النتيجة */
@@ -269,6 +361,7 @@
             text-align: center;
             padding: 40px;
             display: none;
+            background: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95));
         }
         
         .result-screen.active {
@@ -276,14 +369,19 @@
         }
         
         .result-icon {
-            font-size: 4rem;
+            font-size: 5rem;
             margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .result-title {
-            font-size: 2rem;
+            font-size: 2.2rem;
             margin-bottom: 20px;
-            color: #2c3e50;
+            color: var(--primary);
+            font-weight: 800;
         }
         
         .result-buttons {
@@ -301,24 +399,28 @@
         }
         
         .score {
-            font-size: 2.5rem;
+            font-size: 3rem;
             margin: 20px 0;
-            color: #2c3e50;
+            color: var(--primary);
+            font-weight: 800;
         }
         
         .progress-bar {
-            height: 10px;
+            height: 15px;
             background-color: #ecf0f1;
-            border-radius: 5px;
-            margin: 20px 0;
+            border-radius: 10px;
+            margin: 30px auto;
             overflow: hidden;
+            max-width: 400px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .progress {
             height: 100%;
-            background: linear-gradient(90deg, #3498db, #2ecc71);
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
             width: 0%;
-            transition: width 0.5s ease;
+            transition: width 0.8s ease;
+            border-radius: 10px;
         }
         
         /* المؤقت */
@@ -326,24 +428,29 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 15px 0;
+            margin: 20px 0;
             gap: 10px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e6f7ff 100%);
+            border-radius: 50px;
+            display: inline-flex;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
         }
         
         .timer-icon {
             font-size: 1.5rem;
-            color: #e74c3c;
+            color: var(--info);
         }
         
         /* مؤشر التحميل */
         .loader {
-            border: 5px solid 'f3f3f3';
-            border-top: 5px solid #3498db;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 30px auto;
         }
         
         @keyframes spin {
@@ -353,45 +460,158 @@
         
         /* رسائل حالة API */
         .api-status {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
             text-align: center;
             display: none;
+            font-weight: 600;
         }
         
         .api-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+            box-shadow: 0 4px 8px rgba(46, 125, 50, 0.1);
         }
         
         .api-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+            box-shadow: 0 4px 8px rgba(198, 40, 40, 0.1);
         }
         
         /* نصوص عربية */
         .arabic-text {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 2;
+            font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
         }
         
         .purple-text {
-            color: #9933ff;
+            color: var(--primary);
+            font-weight: 700;
+        }
+        
+        /* تأثيرات للكلمات المهمة */
+        .highlight {
+            background: linear-gradient(120deg, rgba(106, 17, 203, 0.2) 0%, rgba(37, 117, 252, 0.2) 100%);
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: 700;
+        }
+        
+        /* تصميم متجاوب */
+        @media (max-width: 768px) {
+            .quiz-container {
+                border-radius: 15px;
+            }
+            
+            .start-screen h1 {
+                font-size: 2.2rem;
+            }
+            
+            .start-screen p {
+                font-size: 1.1rem;
+            }
+            
+            .btn-start {
+                padding: 14px 35px;
+                font-size: 1.1rem;
+            }
+            
+            .quiz-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .stats {
+                justify-content: center;
+            }
+            
+            .question-text {
+                font-size: 1.3rem;
+                padding: 15px;
+            }
+            
+            .option {
+                padding: 15px 20px;
+                font-size: 1rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .result-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .result-title {
+                font-size: 1.8rem;
+            }
+            
+            .score {
+                font-size: 2.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .screen {
+                padding: 20px;
+            }
+            
+            .start-screen {
+                padding: 30px 20px;
+            }
+            
+            .start-screen h1 {
+                font-size: 1.8rem;
+            }
+            
+            .question-text {
+                font-size: 1.2rem;
+            }
+            
+            .option {
+                padding: 12px 15px;
+            }
+            
+            .stat-box {
+                padding: 10px 12px;
+                min-width: 70px;
+            }
+            
+            .stat-value {
+                font-size: 1.1rem;
+            }
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="quiz-container">
         <!-- شاشة البداية -->
         <div class="screen start-screen active">
-            <h1>حرف الفاء - Quiz</h1>
-            <p>اختبار معرفتك بحرف الفاء في اللغة العربية</p>
-            <p>سيتم تتبع إجاباتك وتسجيلها</p>
+            <h1 class="arabic-text">إختبار <span class="highlight">حرف الفاء</span></h1>
+            <p class="arabic-text">اختبر معرفتك بحرف الفاء في اللغة العربية من خلال هذا الاختبار التفاعلي الممتع!</p>
+            <p class="arabic-text">سيتم تتبع إجاباتك وتسجيلها لتقييم تقدمك في التعلم.</p>
             <div class="api-status" id="api-status"></div>
-            <button class="btn-start" id="start-btn">بدء الاختبار</button>
+            <button class="btn-start" id="start-btn">
+                <i class="fas fa-play-circle"></i> بدء الاختبار
+            </button>
         </div>
         
         <!-- شاشة التحميل -->
@@ -402,9 +622,26 @@
         
         <!-- شاشة الاختبار -->
         <div class="screen quiz-screen">
-            <div class="timer-container">
-                <div class="timer-icon">⏱️</div>
-                <div class="stat-value">الوقت على السؤال: <span id="question-timer">00:00</span></div>
+            <div class="quiz-header">
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-label arabic-text">السؤال</div>
+                        <div class="stat-value" id="current-question">1</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label arabic-text">الإجمالي</div>
+                        <div class="stat-value" id="total-questions">5</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label arabic-text">النقاط</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                </div>
+                
+                <div class="timer-container">
+                    <div class="timer-icon">⏱️</div>
+                    <div class="stat-value arabic-text">الوقت: <span id="question-timer">00:00</span></div>
+                </div>
             </div>
             
             <div class="question-container">
@@ -420,9 +657,15 @@
             </div>
             
             <div class="controls">
-                <button id="hint-btn" class="btn-secondary">تلميح</button>
-                <button id="confirm-btn" class="btn-success" disabled>✅ تأكيد الإجابة</button>
-                <button id="pause-btn" class="btn-secondary">⏸️ إيقاف مؤقت</button>
+                <button id="hint-btn" class="btn-warning">
+                    <i class="fas fa-lightbulb"></i> تلميح
+                </button>
+                <button id="confirm-btn" class="btn-success" disabled>
+                    <i class="fas fa-check-circle"></i> تأكيد الإجابة
+                </button>
+                <button id="pause-btn" class="btn-secondary">
+                    <i class="fas fa-pause"></i> إيقاف مؤقت
+                </button>
             </div>
             
             <div class="api-status" id="quiz-api-status"></div>
@@ -430,46 +673,63 @@
         
         <!-- شاشة التوقف المؤقت -->
         <div class="paused-overlay" id="paused-overlay">
-            <h2>الاختبار متوقف مؤقتًا</h2>
-            <p>تم إيقاف المؤقت مؤقتًا</p>
+            <h2 class="arabic-text">الاختبار متوقف مؤقتًا</h2>
+            <p class="arabic-text">يمكنك استئناف الاختبار أو إعادة البدء من جديد</p>
             <div class="result-buttons">
-                <button id="resume-btn" class="btn-success">▶️ استئناف</button>
-                <button id="restart-quiz-btn" class="btn-primary">🔄 إعادة الاختبار</button>
-                <button id="abandon-quiz-btn" class="btn-danger">🚫 التخلي عن الاختبار</button>
+                <button id="resume-btn" class="btn-success">
+                    <i class="fas fa-play"></i> استئناف
+                </button>
+                <button id="restart-quiz-btn" class="btn-primary">
+                    <i class="fas fa-redo"></i> إعادة الاختبار
+                </button>
+                <button id="abandon-quiz-btn" class="btn-danger">
+                    <i class="fas fa-times"></i> التخلي عن الاختبار
+                </button>
             </div>
         </div>
         
         <!-- شاشة الإجابة الصحيحة -->
         <div class="screen correct-result-screen">
             <div class="result-icon">✅</div>
-            <h2 class="result-title">إجابة صحيحة!</h2>
-            <p>أحسنت! لقد أجبت بشكل صحيح.</p>
+            <h2 class="result-title arabic-text">إجابة صحيحة!</h2>
+            <p class="arabic-text">أحسنت! لقد أجبت بشكل صحيح.</p>
             <div class="result-buttons">
-                <button id="next-question-btn" class="btn-primary">السؤال التالي →</button>
+                <button id="next-question-btn" class="btn-primary">
+                    السؤال التالي <i class="fas fa-arrow-left"></i>
+                </button>
             </div>
         </div>
         
         <!-- شاشة الإجابة الخاطئة -->
         <div class="screen incorrect-result-screen">
             <div class="result-icon">❌</div>
-            <h2 class="result-title">إجابة خاطئة!</h2>
-            <p>للأسف، هذه الإجابة غير صحيحة.</p>
+            <h2 class="result-title arabic-text">إجابة خاطئة!</h2>
+            <p class="arabic-text">للأسف، هذه الإجابة غير صحيحة.</p>
             <div class="result-buttons">
-                <button id="retry-btn" class="btn-secondary">🔄 حاول مرة أخرى</button>
+                <button id="retry-btn" class="btn-secondary">
+                    <i class="fas fa-redo"></i> حاول مرة أخرى
+                </button>
             </div>
         </div>
         
         <!-- شاشة النتائج النهائية -->
         <div class="screen results-screen">
-            <h2>تم الانتهاء من الاختبار!</h2>
-            <div class="score">نتيجتك: <span id="final-score">0</span>/<span id="max-score">1</span></div>
+            <div class="result-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h2 class="arabic-text">تم الانتهاء من الاختبار!</h2>
+            <div class="score arabic-text">نتيجتك: <span id="final-score">0</span>/<span id="max-score">5</span></div>
             
             <div class="progress-bar">
                 <div class="progress" id="progress"></div>
             </div>
             
-            <p id="result-end-message">تهانينا على إكمال الاختبار!</p>
-            <button id="restart-btn" class="btn-primary">إعادة الاختبار</button>
+            <p id="result-end-message" class="arabic-text">تهانينا على إكمال الاختبار!</p>
+            <div class="result-buttons">
+                <button id="restart-btn" class="btn-primary">
+                    <i class="fas fa-redo"></i> إعادة الاختبار
+                </button>
+            </div>
         </div>
     </div>
 
@@ -478,7 +738,7 @@
         const API_BASE_URL = 'http://localhost:5000';
         const USER_ID = '+14388864855';
         const KID_INDEX = '0';
-        const QUIZ_ID = '68b1b251055bd8e52b27d107';
+        const QUIZ_ID = '68b70a682f28f00081beaafb';
         
         // Variables globales
         let quizData = [];

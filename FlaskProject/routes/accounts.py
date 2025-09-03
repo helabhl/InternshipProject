@@ -9,8 +9,8 @@ def create_account():
     data = request.get_json()
     try:
         # Si tu as un champ "password" dans data, on le hash
-        if "password_hash" in data:
-            data["password_hash"] = generate_password_hash(data["password_hash"])
+        # if "password_hash" in data:
+        #     data["password_hash"] = generate_password_hash(data["password_hash"])
         
         account = AccountData(**data)
         account.save()

@@ -77,3 +77,22 @@ def delete_quiz(quiz_id):
         return jsonify({"error": "Quiz not found"}), 404
     quiz.delete()
     return jsonify({"message": "Quiz deleted"}), 200
+
+
+@quiz_bp.route('/subject/<subject_name>', methods=['GET'])
+def get_quizzes_by_subject(subject_name):
+    quizzes = Quiz.objects(subject=subject_name)
+    if not quizzes:
+        return jsonify({"message": f"No quizzes found for subject '{subject_name}'"}), 404
+    return jsonify([mongo_to_dict(q) for q in quizzes]), 200
+
+
+@quiz_bp.route('/subjects', methods=['GET'])
+def get_all_subjects():
+    # Récupérer uniquement le champ subject de tous les quizzes
+    subjects = Quiz.objects().distinct('subject')
+
+    if not subjects:
+        return jsonify({"message": "No subjects found"}), 404
+    
+    return jsonify({"subjects": subjects}), 200

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models.account import AccountData
 from werkzeug.security import generate_password_hash
-accounts_bp = Blueprint("accountsdata", __name__)
+accounts_bp = Blueprint("accountsdatas", __name__)
 
 
 @accounts_bp.route('/accounts', methods=['POST'])

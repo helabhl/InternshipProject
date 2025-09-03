@@ -89,6 +89,6 @@ class AccountData(Document):
     maxChildren = IntField()
 
     meta = {
-        'collection': 'accountsdata',
+        'collection': 'accountsdatas',
         'ordering': ['-id']
     }

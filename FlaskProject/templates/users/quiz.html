@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Éducatif Moderne</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome local -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/all.min.css') }}">
+
+    <!-- Chart.js local -->
+    <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+
     <style>
         :root {
             --primary: #6a11cb;
@@ -38,7 +42,7 @@
 
         /* Header styles */
         header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             padding: 0.8rem 0;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -279,7 +283,7 @@
         }
 
         .period-btn.active {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
         }
@@ -1128,7 +1132,7 @@
         <div class="page-header">
             <div class="child-info">
                 <div class="child-avatar">
-                    <img src="https://ui-avatars.com/api/?name=Enfant+Exemple&background=6a11cb&color=fff" alt="Avatar enfant">
+                    <img alt="Avatar enfant">
                 </div>
                 <div>
                     <h2 class="child-name">Ferid</h2>
@@ -1934,6 +1938,7 @@
                 }
             });
         });
+    
     </script>
 </body>
 </html>

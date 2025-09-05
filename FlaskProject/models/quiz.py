@@ -9,7 +9,7 @@ from mongoengine import (
     DateTimeField,
     signals,
 )
-import datetime
+from datetime import datetime, timezone
 
 
 class Suggestion(EmbeddedDocument):
@@ -55,19 +55,27 @@ class Quiz(Document):
     questions = ListField(EmbeddedDocumentField(Question))
     status = StringField()
 
-    created_at = DateTimeField(default=datetime.datetime.utcnow)
-    updated_at = DateTimeField(default=datetime.datetime.utcnow)
+    # Audit
+    __v = IntField(default=0, db_field="__v")  # équivalent de versionKey
+    createdAt = DateTimeField(default=datetime.now(timezone.utc))
+    updatedAt = DateTimeField(default=datetime.now(timezone.utc))
+
 
     meta = {
         'collection': 'quizesdata',
         'indexes': ['key'],
-        'ordering': ['-created_at'],
+        'ordering': ['-createdAt'],
+        "strict": False  # ✅ ignore les champs inconnus comme __v
+
     }
 
-    # Pour gérer automatiquement updated_at à chaque sauvegarde
-    @classmethod
-    def pre_save(cls, sender, document, **kwargs):
-        document.updated_at = datetime.datetime.utcnow()
+    def save(self, *args, **kwargs):
+        """Override save to auto-update updatedAt + increment __v"""
+        if not self.createdAt:
+            self.createdAt = datetime.now(timezone.utc)
 
+        self.updatedAt = datetime.now(timezone.utc)
 
-signals.pre_save.connect(Quiz.pre_save, sender=Quiz)
+        self.__v = (self.__v or 0) + 1  # incrémentation automatique
+        return super(Quiz, self).save(*args, **kwargs)
+

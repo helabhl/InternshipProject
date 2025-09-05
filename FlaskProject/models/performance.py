@@ -1,5 +1,5 @@
 from mongoengine import *
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 # --- Détails par chapitre ---
@@ -39,10 +39,9 @@ class Metrics(Document):
     subject_stats = MapField(EmbeddedDocumentField(SubjectStats), default=dict)
     time_spent = FloatField(default=0.0)                            # ex: 9.73
 
-    created_at = DateTimeField(default=datetime.utcnow)
+
 
     meta = {
         'collection': 'metrics',
-        'ordering': ['-created_at'],
         'indexes': []
     }

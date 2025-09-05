@@ -1,4 +1,6 @@
 from mongoengine import *
+from mongoengine import DynamicEmbeddedDocument
+from datetime import datetime, timezone
 import config
 
 # Connexion MongoDB (à mettre dans ton app Flask)
@@ -51,7 +53,8 @@ class ActiveSessions(EmbeddedDocument):
     Phone = MapField(StringField(), default={})
     Web = MapField(StringField(), default={})
 
-class User(EmbeddedDocument):
+
+class User(DynamicEmbeddedDocument):
     achivementsUnlocked = StringField()
     birthDate = StringField()
     next_reward = StringField()
@@ -71,10 +74,6 @@ class User(EmbeddedDocument):
 
 class AccountData(Document):
     userID = StringField(required=True, unique=True)
-    # phone, email, mot de passe : new fields (, unique=True)
-    # phone = StringField(required=True)
-    # email = StringField(required=True)
-    # password_hash = StringField(required=True)
     kids = MapField(EmbeddedDocumentField(User), default={})
     Active_Sessions = EmbeddedDocumentField(ActiveSessions, default=ActiveSessions)
     authenticationType = StringField()
@@ -87,8 +86,26 @@ class AccountData(Document):
     subIdEklectic = StringField()
     childNumber = IntField()
     maxChildren = IntField()
+    # Audit
+    __v = IntField(default=0, db_field="__v")  # équivalent de versionKey
+    createdAt = DateTimeField(default=datetime.now(timezone.utc))
+    updatedAt = DateTimeField(default=datetime.now(timezone.utc))
+
+
 
     meta = {
         'collection': 'accountsdatas',
-        'ordering': ['-id']
+        'ordering': ['-id'],
+        'strict': False  # <-- allow extra fields
+
     }
+
+    def save(self, *args, **kwargs):
+        """Override save to auto-update updatedAt + increment __v"""
+        if not self.createdAt:
+            self.createdAt = datetime.utcnow()
+        self.updatedAt = datetime.utcnow()
+        self.__v = (self.__v or 0) + 1  # incrémentation automatique
+        return super(AccountData, self).save(*args, **kwargs)
+
+

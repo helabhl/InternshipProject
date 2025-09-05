@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 # =========================
 # Tentative sur UNE question
 # =========================
-class QuestionAttempt(EmbeddedDocument):
+class QuestionAttempt(DynamicEmbeddedDocument):
     is_correct = IntField(min_value=0, required=True, default=0)   # 0 ou 1
     is_wrong = IntField(min_value=0, required=True, default=0)
     hint_used = IntField(min_value=0, required=True, default=0)
@@ -20,7 +20,7 @@ class QuestionAttempt(EmbeddedDocument):
 # Réponse à une question (global pour la question)
 # =========================
 
-class Answer(EmbeddedDocument):
+class Answer(DynamicEmbeddedDocument):
     # Liste des tentatives faites sur cette question
     attempts = ListField(EmbeddedDocumentField(QuestionAttempt))
     
@@ -68,16 +68,28 @@ class AttemptData(Document):
 
 
     # Audit
-    created_at = DateTimeField()  
-    updated_at = DateTimeField()  
+    __v = IntField(default=0, db_field="__v")  # équivalent de versionKey
+    createdAt = DateTimeField(default=datetime.now(timezone.utc))
+    updatedAt = DateTimeField(default=datetime.now(timezone.utc))
 
     meta = {
         'collection': 'attemptsdata',
         'ordering': ['-start_time'],
-        'indexes': ['userID', 'kidIndex', 'quizID']
+        'indexes': ['userID', 'kidIndex', 'quizID'],
+        "strict": False  
     }
 
     def init_answers(self, num_questions):
         """Initialise les réponses avec des valeurs par défaut"""
         self.answers = [Answer() for _ in range(num_questions)]
         self.total_questions = num_questions
+
+    def save(self, *args, **kwargs):
+        """Override save to auto-update updatedAt + increment __v"""
+        if not self.createdAt:
+            self.createdAt = datetime.utcnow()
+        self.updatedAt = datetime.utcnow()
+        self.__v = (self.__v or 0) + 1  # incrémentation automatique
+        return super(AttemptData, self).save(*args, **kwargs)
+
+

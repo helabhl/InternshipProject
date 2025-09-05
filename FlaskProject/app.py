@@ -15,7 +15,7 @@ CORS(app)  # Allow all origins
 app.secret_key = os.getenv("SECRET_KEY")
 
 # --- MongoDB connection ---
-MONGO_URI = os.getenv("MONGO_URI") or "mongodb://localhost:27017/"
+MONGO_URI = os.getenv("MONGO_URI") 
 DB_NAME = os.getenv("DB_NAME") or "db"
 
 client = MongoClient(MONGO_URI)

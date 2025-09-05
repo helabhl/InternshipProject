@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify, request
 from controllers.performanceController import PerformanceController
 
 performance_bp = Blueprint("performance", __name__)
@@ -11,14 +11,7 @@ def messages_codes(userId, kidIndex):
 def metrics(userId, kidIndex):
     return PerformanceController.get_metrics(userId, kidIndex)
 
-@performance_bp.route("/user/<userId>/kid/<kidIndex>/performances", methods=["GET"])
-def performances(userId, kidIndex):
-    return PerformanceController.get_performance(userId, kidIndex)
-
 @performance_bp.route("/user/<userId>/kid/<kidIndex>/weekly-scores", methods=["GET"])
 def weekly_scores(userId, kidIndex):
     return PerformanceController.get_weekly_average_scores(userId, kidIndex)
 
-@performance_bp.route("/user/<userId>/kid/<kidIndex>/subject-distribution", methods=["GET"])
-def subject_distribution(userId, kidIndex):
-    return PerformanceController.get_subject_distribution(userId, kidIndex)

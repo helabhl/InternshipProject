@@ -1,8 +1,9 @@
 from flask import Blueprint, request, jsonify, session, redirect, url_for, render_template, flash
 from controllers.authController import login_sms_logic, verify_logic
 from models.account import AccountData
+from bson import ObjectId
 
-auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+auth_bp = Blueprint("auth", __name__)
 
 
 @auth_bp.route("/login_sms", methods=["GET", "POST"])
@@ -22,13 +23,28 @@ def login_sms():
 
 @auth_bp.route("/verify", methods=["GET", "POST"])
 def verify():
+
+    def convert_objectid(obj):
+        """Convertit récursivement tous les ObjectId en str."""
+        if isinstance(obj, dict):
+            return {k: convert_objectid(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [convert_objectid(i) for i in obj]
+        elif isinstance(obj, ObjectId):
+            return str(obj)
+        else:
+            return obj
+
     if request.method == "POST":
+
         entered_code = request.form.get("otp")
         response, status = verify_logic(entered_code)
 
         if status == 200:
-            account_dict = response["account"]
-            return render_template("users/home.html", parent=account_dict)
+            account_dict = convert_objectid(response["account"])
+            # Stocker dans la session
+            session['account'] = account_dict
+            return redirect(url_for("accountsdatas.home"))
         else:
             flash(response["error"], "danger")
 

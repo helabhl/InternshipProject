@@ -1307,7 +1307,7 @@
     quizItems.innerHTML = "<p>Chargement des quiz...</p>";
 
     try {
-        const res = await fetch(`http://localhost:5000/quiz/subject/${encodeURIComponent(subject)}`);
+        const res = await fetch(`/quiz/subject/${encodeURIComponent(subject)}`);
         const quizzes = await res.json();
 
         quizItems.innerHTML = "";
@@ -1480,7 +1480,7 @@
 
         async function loadSubjects() {
     try {
-        const res = await fetch("http://localhost:5000/quiz/subjects");
+        const res = await fetch("/quiz/subjects");
         const data = await res.json();
 
         if (data.subjects && data.subjects.length > 0) {

@@ -551,11 +551,9 @@ def chapter_distribution(attempts, quizzes):
 def total_time_spent(attempts):
     total_time = 0
     for a in attempts:
-        if a.get("completed"):
-            start, end = a.get("start_time"), a.get("end_time")
-            if start and end:
-                total_time += (end - start).total_seconds() / 60  # minutes
-    return total_time
+        if a.get("timeout") != 1 and a.get("duration"):
+            total_time += a.get("duration")
+    return total_time/ 60  # minutes
 
 def persistent_failures(attempts):
     failed_quizzes = {}

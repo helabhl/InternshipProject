@@ -1228,7 +1228,7 @@
     </div>
 
     <footer>
-        <p>© 2023 Système de suivi. Tous droits réservés.</p>
+        <p>© 2025 Système de suivi. Tous droits réservés.</p>
     </footer>
 </div>
 
@@ -1262,7 +1262,7 @@ async function loadNameKids(userID) {
         console.log("➡️ Début chargement enfants pour userID:", userID);
 
         // 1️⃣ Appel API
-        const url = `http://localhost:5000/accounts/get_kids_names/${encodeURIComponent(userID)}`;
+        const url = `/get_kids_names/${encodeURIComponent(userID)}`;
         console.log("📡 Appel API:", url);
         const res = await fetch(url);
 
@@ -1430,26 +1430,30 @@ function updatePeriodDisplay(startDate, endDate) {
 function updateDisplayedData() {
     const dateRange = getDateRange();
     loadMessages(dateRange.fromStr, dateRange.toStr);
-    loadMetrics(dateRange.fromStr, dateRange.toStr);
-    loadPerformances(dateRange.fromStr, dateRange.toStr);
-    loadCharts(dateRange.fromStr, dateRange.toStr);
+    loadAllData(dateRange.fromStr, dateRange.toStr); // Remplace loadMetrics et loadCharts
 }
 
-// Fonction pour charger les métriques
-function loadMetrics(fromStr, toStr) {
+// Fonction pour charger toutes les données en un seul appel
+function loadAllData(fromStr, toStr) {
     fetch(`/user/${userID}/kid/${kidIndex}/metrics?from=${fromStr}&to=${toStr}&period=${currentPeriod}`)
     .then(res => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
     })
     .then(data => {
+        // Afficher les métriques de base
         displayMetrics(data);
+        
+        // Générer les statistiques par matière
         renderSubjectStats(data);
+        
+        // Charger les graphiques avec les données déjà récupérées
+        loadChartsWithData(data, fromStr, toStr);
     })
-    .catch(error => console.error("Erreur lors du chargement des métriques:", error));
+    .catch(error => console.error("Erreur lors du chargement des données:", error));
 }
 
-// Fonction pour afficher les métriques
+// Fonction pour afficher les métriques (inchangée)
 function displayMetrics(data) {
     // Nombre total de tests
     const totalTests = data.completion_rate && data.completion_rate[1] ? data.completion_rate[1] : 0;
@@ -1483,7 +1487,7 @@ function displayMetrics(data) {
     document.getElementById("completion-rate").innerText = `${completionRate.toFixed(0)}%`;
 }
 
-// Charger les messages (récompenses, alertes, recommandations)
+// Charger les messages (récompenses, alertes, recommandations) - inchangé
 function loadMessages(fromStr, toStr) {
     fetch(`/user/${userID}/kid/${kidIndex}/messages-codes?from=${fromStr}&to=${toStr}&period=${currentPeriod}`)
         .then(res => {
@@ -1571,30 +1575,11 @@ function displayMessages(data) {
     });
 }
 
-// Charger les performances
-function loadPerformances(fromStr, toStr) {
-    fetch(`/user/${userID}/kid/${kidIndex}/performances?from=${fromStr}&to=${toStr}&period=${currentPeriod}`)
-        .then(res => {
-            if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
-            return res.json();
-        })
-        .then(data => displayPerformances(data))
-        .catch(err => {
-            console.error("Erreur loadPerformances :", err);
-        });
-}
-
 // Afficher les performances
 function displayPerformances(data) {
     // Graphique barres (barplot)
     const barLabels = data.barplot ? Object.keys(data.barplot) : [];
     const barData = data.barplot ? Object.values(data.barplot) : [];
-
-    const ctxBar = document.getElementById("weekdayChart");
-    if (!ctxBar) {
-        console.error("Canvas weekdayChart introuvable");
-        return;
-    }
     
     if (barChartInstance) barChartInstance.destroy();
     barChartInstance = new Chart(ctxBar, {
@@ -1618,10 +1603,7 @@ function displayPerformances(data) {
     const lineLabels = data.lineplot ? data.lineplot.map((q, i) => `Test ${i+1}`) : [];
 
     const ctxLine = document.getElementById("scoreChart");
-    if (!ctxLine) {
-        console.error("Canvas scoreChart introuvable");
-        return;
-    }
+    
     
     if (lineChartInstance) lineChartInstance.destroy();
     lineChartInstance = new Chart(ctxLine, {
@@ -1644,13 +1626,13 @@ function displayPerformances(data) {
     });
 }
 
-// Charger les graphiques supplémentaires
-function loadCharts(fromStr, toStr) {
+// Charger les graphiques avec les données déjà récupérées
+function loadChartsWithData(data, fromStr, toStr) {
     loadProgressChart(fromStr, toStr);
-    loadSubjectChart(fromStr, toStr);
+    loadSubjectChartWithData(data); // Utilise les données déjà récupérées
 }
 
-// Charger le graphique de progression
+// Charger le graphique de progression - inchangé
 function loadProgressChart(fromStr, toStr) {
     const progressCtx = document.getElementById('progressChart');
     if (!progressCtx) {
@@ -1699,57 +1681,48 @@ function loadProgressChart(fromStr, toStr) {
         .catch(err => console.error("Erreur lors du chargement du graphique de progression:", err));
 }
 
-// Charger le graphique de répartition par matière
-function loadSubjectChart(fromStr, toStr) {
+// Charger le graphique de répartition par matière avec les données existantes
+function loadSubjectChartWithData(data) {
     const subjectCtx = document.getElementById('subjectChart');
     if (!subjectCtx) {
         console.error("Canvas subjectChart introuvable");
         return;
     }
     
-    fetch(`/user/${userID}/kid/${kidIndex}/metrics?from=${fromStr}&to=${toStr}&period=${currentPeriod}`)
-        .then(res => {
-            if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
-            return res.json();
-        })
-        .then(data => {
-            const subjectStats = data.subject_stats || {};
-            
-            // Extraire labels et valeurs
-            const labels = Object.keys(subjectStats);
-            const values = Object.values(subjectStats).map(s => s.count || 0);
-            
-            if (subjectChartInstance) subjectChartInstance.destroy();
-            
-            subjectChartInstance = new Chart(subjectCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: [
-                            '#FF9E40',
-                            '#47D764',
-                            '#4A6DA7',
-                            '#9B5DE5',
-                            '#4ECDC4'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right'
-                        }
-                    }
+    const subjectStats = data.subject_stats || {};
+    
+    // Extraire labels et valeurs
+    const labels = Object.keys(subjectStats);
+    const values = Object.values(subjectStats).map(s => s.count || 0);
+    
+    if (subjectChartInstance) subjectChartInstance.destroy();
+    
+    subjectChartInstance = new Chart(subjectCtx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: [
+                    '#FF9E40',
+                    '#47D764',
+                    '#4A6DA7',
+                    '#9B5DE5',
+                    '#4ECDC4'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
                 }
-            });
-        })
-        .catch(err => console.error("Erreur lors du chargement du graphique des matières:", err));
+            }
+        }
+    });
 }
-
 // Fonction pour générer les cartes de statistiques par matière
 function renderSubjectStats(data) {
     const container = document.getElementById('subjectStatsContainer');
@@ -1810,7 +1783,6 @@ function renderSubjectStats(data) {
             chapterTitle.className = 'chapter-title';
             chapterTitle.style.fontWeight = '600';
             chapterTitle.style.margin = '1rem 0 0.5rem 0';
-            chapterTitle.textContent = 'Chapitres:';
             chapterList.appendChild(chapterTitle);
             
             for (const [chapterName, chapterStats] of Object.entries(subjectChapters)) {

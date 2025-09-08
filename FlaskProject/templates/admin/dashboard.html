@@ -1,12 +1,1018 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Parent Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Engagement des Quiz</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --primary-light: #8a36f5;
+            --secondary: #2575fc;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #3498db;
+            --light: #f8f9fa;
+            --dark: #2c3e50;
+            --gray: #7f8c8d;
+            --white: #ffffff;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            --card-hover: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header styles */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 0.8rem 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1.5rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            transition: all 0.3s;
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        nav a:hover, nav a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Nouvelle structure de grille */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto auto;
+            gap: 1.5rem;
+            grid-template-areas:
+                "header header"
+                "filters filters"
+                "stats stats"
+                "charts charts"
+                "subjects subjects";
+        }
+
+        .page-header {
+            grid-area: header;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .filters-container {
+            grid-area: filters;
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .stats-grid {
+            grid-area: stats;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 0;
+        }
+
+        .charts-container {
+            grid-area: charts;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 0;
+        }
+
+        .subject-stats {
+            grid-area: subjects;
+            margin-top: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Card styles */
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+        }
+
+        .stat-card:nth-child(1)::before { background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%); }
+        .stat-card:nth-child(2)::before { background: linear-gradient(90deg, var(--success) 0%, #91E5A6 100%); }
+        .stat-card:nth-child(3)::before { background: linear-gradient(90deg, var(--warning) 0%, #FFE194 100%); }
+        .stat-card:nth-child(4)::before { background: linear-gradient(90deg, var(--info) 0%, #92E4DF 100%); }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover);
+        }
+
+        .stat-card i {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0.6rem;
+            color: var(--dark);
+            font-weight: 800;
+        }
+
+        .stat-card p {
+            color: var(--gray);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Charts */
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+            height: 100%;
+        }
+
+        .chart-card:hover {
+            box-shadow: var(--card-hover);
+        }
+
+        .chart-title {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .chart-title i {
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+        }
+
+        /* Nouveau style pour les cartes de sujets en grille */
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .subject-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.2rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .subject-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--card-hover);
+        }
+
+        .subject-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+
+        .subject-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--dark);
+        }
+
+        .subject-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .subject-stat {
+            text-align: center;
+            padding: 0.6rem;
+            background-color: rgba(74, 109, 167, 0.08);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .subject-stat:hover {
+            transform: scale(1.05);
+            background-color: rgba(74, 109, 167, 0.12);
+        }
+
+        .subject-stat-value {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
+        }
+
+        .subject-stat-label {
+            font-size: 0.75rem;
+            color: var(--gray);
+            font-weight: 600;
+        }
+
+        .grades-list {
+            margin-top: 0.8rem;
+        }
+
+        .grade-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+
+        .grade-item:last-child {
+            border-bottom: none;
+        }
+
+        .grade-name {
+            flex: 1;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .grade-stats {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .grade-stat {
+            text-align: center;
+            min-width: 55px;
+        }
+
+        .grade-stat-value {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 0.85rem;
+        }
+
+        .grade-stat-label {
+            font-size: 0.7rem;
+            color: var(--gray);
+        }
+
+        /* Filters */
+        .filter-row {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: white;
+            font-size: 1rem;
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+        }
+
+        /* Period selector */
+        .period-selector {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .period-buttons {
+            display: flex;
+            background-color: #f0f0f0;
+            border-radius: 30px;
+            padding: 4px;
+            margin-left: auto;
+        }
+
+        .period-btn {
+            background: none;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .period-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "filters"
+                    "stats"
+                    "charts"
+                    "subjects";
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .subject-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .period-selector {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .period-buttons {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .subject-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="bi bi-graph-up"></i>
+                <h1>Dashboard Admin - Engagement Quiz</h1>
+            </div>
 
+            <nav>
+                <ul>
+                    <li><a href="#" class="active"><i class="bi bi-speedometer2"></i> Tableau de bord</a></li>
+                    <li><a href="#"><i class="bi bi-people"></i> Utilisateurs</a></li>
+                    <li><a href="#"><i class="bi bi-journals"></i> Contenus</a></li>
+                    <li><a href="#"><i class="bi bi-gear"></i> Paramètres</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-<body class="bg-light">
-    
+    <!-- Main Content -->
+    <div class="dashboard-container">
+        <!-- Page header -->
+        <div class="page-header">
+            <div class="header-title">
+                <h2>Statistiques d'engagement des quiz</h2>
+                <p>Analyse des élèves ayant essayé des quiz par année, sujet et chapitre</p>
+            </div>
+            
+            <div class="period-selector">
+                <div class="period-buttons">
+                    <button class="period-btn active" data-period="week">Hebdomadaire</button>
+                    <button class="period-btn" data-period="month">Mensuel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-container">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label">Année scolaire</label>
+                    <select class="filter-select" id="grade-filter">
+                        <option value="all">Toutes les années</option>
+                        <option value="1ere">1ère année</option>
+                        <option value="2eme">2ème année</option>
+                        <option value="3eme">3ème année</option>
+                        <option value="4eme">4ème année</option>
+                        <option value="5eme">5ème année</option>
+                        <option value="6eme">6ème année</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Sujet</label>
+                    <select class="filter-select" id="subject-filter">
+                        <option value="all">Tous les sujets</option>
+                        <option value="math">Mathématiques</option>
+                        <option value="science">Sciences</option>
+                        <option value="history">Histoire</option>
+                        <option value="geography">Géographie</option>
+                        <option value="literature">Littérature</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Période</label>
+                    <select class="filter-select" id="time-filter">
+                        <option value="7">7 derniers jours</option>
+                        <option value="14">14 derniers jours</option>
+                        <option value="30">30 derniers jours</option>
+                        <option value="90">3 derniers mois</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="bi bi-people"></i>
+                <h3 id="total-students">1,243</h3>
+                <p>Élèves actifs</p>
+            </div>
+            <div class="stat-card">
+                <i class="bi bi-check-circle"></i>
+                <h3 id="quiz-attempts">8,742</h3>
+                <p>Tentatives de quiz</p>
+            </div>
+            <div class="stat-card">
+                <i class="bi bi-bar-chart"></i>
+                <h3 id="avg-score">72.4%</h3>
+                <p>Score moyen</p>
+            </div>
+            <div class="stat-card">
+                <i class="bi bi-clock"></i>
+                <h3 id="avg-time">12.7</h3>
+                <p>Temps moyen (min)</p>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-container">
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    <span>Engagement par année</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="gradeChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="bi bi-pie-chart-fill"></i>
+                    <span>Répartition par sujet</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="subjectChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject Stats - Nouvelle disposition en grille -->
+        <div class="subject-stats">
+            <div class="chart-title">
+                <i class="bi bi-book"></i>
+                <span>Sujets et répartition par année</span>
+            </div>
+            <div class="subject-grid" id="subjectStatsContainer">
+                <!-- Les cartes des matières seront générées ici par JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Données simulées pour le dashboard avec années scolaires
+        const quizData = {
+            grades: {
+                "1ere": { students: 220, attempts: 1050, avgScore: 65.2, avgTime: 10.3 },
+                "2eme": { students: 210, attempts: 1100, avgScore: 68.5, avgTime: 11.2 },
+                "3eme": { students: 195, attempts: 980, avgScore: 70.8, avgTime: 12.1 },
+                "4eme": { students: 185, attempts: 920, avgScore: 72.4, avgTime: 13.5 },
+                "5eme": { students: 175, attempts: 890, avgScore: 75.1, avgTime: 14.2 },
+                "6eme": { students: 165, attempts: 802, avgScore: 77.3, avgTime: 15.0 }
+            },
+            subjects: {
+                math: { 
+                    students: 620, 
+                    attempts: 3250, 
+                    avgScore: 74.3, 
+                    grades: {
+                        "1ère année": { students: 120, attempts: 650 },
+                        "2ème année": { students: 115, attempts: 620 },
+                        "3ème année": { students: 110, attempts: 580 },
+                        "4ème année": { students: 100, attempts: 520 },
+                        "5ème année": { students: 95, attempts: 480 },
+                        "6ème année": { students: 80, attempts: 400 }
+                    }
+                },
+                science: { 
+                    students: 480, 
+                    attempts: 2450, 
+                    avgScore: 70.8, 
+                    grades: {
+                        "1ère année": { students: 90, attempts: 450 },
+                        "2ème année": { students: 85, attempts: 430 },
+                        "3ème année": { students: 80, attempts: 410 },
+                        "4ème année": { students: 75, attempts: 380 },
+                        "5ème année": { students: 70, attempts: 350 },
+                        "6ème année": { students: 80, attempts: 430 }
+                    }
+                },
+                history: { 
+                    students: 380, 
+                    attempts: 1580, 
+                    avgScore: 68.5, 
+                    grades: {
+                        "1ère année": { students: 70, attempts: 280 },
+                        "2ème année": { students: 65, attempts: 260 },
+                        "3ème année": { students: 60, attempts: 250 },
+                        "4ème année": { students: 55, attempts: 230 },
+                        "5ème année": { students: 65, attempts: 280 },
+                        "6ème année": { students: 65, attempts: 280 }
+                    }
+                },
+                geography: { 
+                    students: 320, 
+                    attempts: 1320, 
+                    avgScore: 73.2, 
+                    grades: {
+                        "1ère année": { students: 55, attempts: 220 },
+                        "2ème année": { students: 50, attempts: 200 },
+                        "3ème année": { students: 50, attempts: 210 },
+                        "4ème année": { students: 55, attempts: 230 },
+                        "5ème année": { students: 55, attempts: 240 },
+                        "6ème année": { students: 55, attempts: 220 }
+                    }
+                },
+                literature: { 
+                    students: 290, 
+                    attempts: 1142, 
+                    avgScore: 75.6, 
+                    grades: {
+                        "1ère année": { students: 50, attempts: 190 },
+                        "2ème année": { students: 45, attempts: 180 },
+                        "3ème année": { students: 45, attempts: 185 },
+                        "4ème année": { students: 50, attempts: 200 },
+                        "5ème année": { students: 50, attempts: 210 },
+                        "6ème année": { students: 50, attempts: 177 }
+                    }
+                }
+            },
+            weeklyTrend: {
+                labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+                data: [1950, 2120, 2340, 2280]
+            },
+            monthlyTrend: {
+                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+                data: [7850, 8120, 8450, 8740, 9020, 9250]
+            }
+        };
+
+        // Initialisation du dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initDashboard();
+            setupEventListeners();
+        });
+
+        // Initialisation du dashboard
+        function initDashboard() {
+            updateStats();
+            renderGradeChart();
+            renderSubjectChart();
+            renderSubjectStats();
+        }
+
+        // Configuration des écouteurs d'événements
+        function setupEventListeners() {
+            // Boutons de période
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    updateCharts();
+                });
+            });
+
+            // Filtres
+            document.querySelectorAll('.filter-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    updateDashboard();
+                });
+            });
+        }
+
+        // Mise à jour des statistiques
+        function updateStats() {
+            // Calcul des totaux
+            let totalStudents = 0;
+            let totalAttempts = 0;
+            let totalScore = 0;
+            let totalTime = 0;
+            let gradeCount = 0;
+
+            for (const grade in quizData.grades) {
+                totalStudents += quizData.grades[grade].students;
+                totalAttempts += quizData.grades[grade].attempts;
+                totalScore += quizData.grades[grade].avgScore;
+                totalTime += quizData.grades[grade].avgTime;
+                gradeCount++;
+            }
+
+            // Mise à jour des éléments DOM
+            document.getElementById('total-students').textContent = totalStudents.toLocaleString();
+            document.getElementById('quiz-attempts').textContent = totalAttempts.toLocaleString();
+            document.getElementById('avg-score').textContent = (totalScore / gradeCount).toFixed(1) + '%';
+            document.getElementById('avg-time').textContent = (totalTime / gradeCount).toFixed(1);
+        }
+
+        // Rendu du graphique des années
+        function renderGradeChart() {
+            const ctx = document.getElementById('gradeChart').getContext('2d');
+            
+            const gradeLabels = [];
+            const studentData = [];
+            const attemptData = [];
+            
+            for (const grade in quizData.grades) {
+                const gradeName = getGradeDisplayName(grade);
+                gradeLabels.push(gradeName);
+                studentData.push(quizData.grades[grade].students);
+                attemptData.push(quizData.grades[grade].attempts);
+            }
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: gradeLabels,
+                    datasets: [
+                        {
+                            label: 'Élèves',
+                            data: studentData,
+                            backgroundColor: 'rgba(106, 17, 203, 0.7)',
+                            borderColor: 'rgba(106, 17, 203, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Tentatives',
+                            data: attemptData,
+                            backgroundColor: 'rgba(37, 117, 252, 0.7)',
+                            borderColor: 'rgba(37, 117, 252, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Rendu du graphique des sujets
+        function renderSubjectChart() {
+            const ctx = document.getElementById('subjectChart').getContext('2d');
+            
+            const subjectLabels = [];
+            const studentData = [];
+            const colors = [
+                'rgba(255, 158, 64, 0.7)',
+                'rgba(71, 215, 100, 0.7)',
+                'rgba(155, 93, 229, 0.7)',
+                'rgba(78, 205, 196, 0.7)',
+                'rgba(241, 91, 181, 0.7)'
+            ];
+            
+            for (const subject in quizData.subjects) {
+                subjectLabels.push(subject.charAt(0).toUpperCase() + subject.slice(1));
+                studentData.push(quizData.subjects[subject].students);
+            }
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: subjectLabels,
+                    datasets: [{
+                        data: studentData,
+                        backgroundColor: colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Rendu des statistiques par sujet
+        function renderSubjectStats() {
+            const container = document.getElementById('subjectStatsContainer');
+            container.innerHTML = '';
+            
+            // Trier les sujets par nombre d'étudiants (ordre décroissant)
+            const sortedSubjects = Object.entries(quizData.subjects)
+                .sort((a, b) => b[1].students - a[1].students);
+            
+            // Créer une carte pour chaque matière
+            for (const [subjectName, data] of sortedSubjects) {
+                const subjectCard = document.createElement('div');
+                subjectCard.className = 'subject-card';
+                
+                // En-tête de la carte
+                const subjectHeader = document.createElement('div');
+                subjectHeader.className = 'subject-header';
+                
+                const subjectNameEl = document.createElement('div');
+                subjectNameEl.className = 'subject-name';
+                subjectNameEl.textContent = subjectName.charAt(0).toUpperCase() + subjectName.slice(1);
+                
+                const subjectStudents = document.createElement('div');
+                subjectStudents.className = 'subject-stat-value';
+                subjectStudents.textContent = `${data.students} élèves`;
+                
+                subjectHeader.appendChild(subjectNameEl);
+                subjectHeader.appendChild(subjectStudents);
+                subjectCard.appendChild(subjectHeader);
+                
+                // Grille des stats principales
+                const statsGrid = document.createElement('div');
+                statsGrid.className = 'subject-stats-grid';
+                
+                // Nombre d'élèves
+                const studentsStat = createSubjectStat(
+                    data.students.toLocaleString(), 
+                    'Élèves'
+                );
+                statsGrid.appendChild(studentsStat);
+                
+                // Tentatives
+                const attemptsStat = createSubjectStat(
+                    data.attempts.toLocaleString(), 
+                    'Tentatives'
+                );
+                statsGrid.appendChild(attemptsStat);
+                
+                subjectCard.appendChild(statsGrid);
+                
+                // Liste des années (remplace les chapitres)
+                const gradesList = document.createElement('div');
+                gradesList.className = 'grades-list';
+                
+                for (const [gradeName, gradeData] of Object.entries(data.grades)) {
+                    const gradeItem = document.createElement('div');
+                    gradeItem.className = 'grade-item';
+                    
+                    const gradeNameEl = document.createElement('div');
+                    gradeNameEl.className = 'grade-name';
+                    gradeNameEl.textContent = gradeName;
+                    
+                    const gradeStatsEl = document.createElement('div');
+                    gradeStatsEl.className = 'grade-stats';
+                    
+                    // Élèves par année
+                    const gradeStudents = document.createElement('div');
+                    gradeStudents.className = 'grade-stat';
+                    const studentsValue = document.createElement('div');
+                    studentsValue.className = 'grade-stat-value';
+                    studentsValue.textContent = gradeData.students;
+                    const studentsLabel = document.createElement('div');
+                    studentsLabel.className = 'grade-stat-label';
+                    studentsLabel.textContent = 'Élèves';
+                    gradeStudents.appendChild(studentsValue);
+                    gradeStudents.appendChild(studentsLabel);
+                    
+                    // Tentatives par année
+                    const gradeAttempts = document.createElement('div');
+                    gradeAttempts.className = 'grade-stat';
+                    const attemptsValue = document.createElement('div');
+                    attemptsValue.className = 'grade-stat-value';
+                    attemptsValue.textContent = gradeData.attempts;
+                    const attemptsLabel = document.createElement('div');
+                    attemptsLabel.className = 'grade-stat-label';
+                    attemptsLabel.textContent = 'Tentatives';
+                    gradeAttempts.appendChild(attemptsValue);
+                    gradeAttempts.appendChild(attemptsLabel);
+                    
+                    gradeStatsEl.appendChild(gradeStudents);
+                    gradeStatsEl.appendChild(gradeAttempts);
+                    
+                    gradeItem.appendChild(gradeNameEl);
+                    gradeItem.appendChild(gradeStatsEl);
+                    gradesList.appendChild(gradeItem);
+                }
+                
+                subjectCard.appendChild(gradesList);
+                container.appendChild(subjectCard);
+            }
+        }
+
+        // Fonction utilitaire pour créer une statistique de matière
+        function createSubjectStat(value, label) {
+            const stat = document.createElement('div');
+            stat.className = 'subject-stat';
+            
+            const valueEl = document.createElement('div');
+            valueEl.className = 'subject-stat-value';
+            valueEl.textContent = value;
+            
+            const labelEl = document.createElement('div');
+            labelEl.className = 'subject-stat-label';
+            labelEl.textContent = label;
+            
+            stat.appendChild(valueEl);
+            stat.appendChild(labelEl);
+            return stat;
+        }
+
+        // Fonction pour obtenir le nom d'affichage de l'année
+        function getGradeDisplayName(gradeKey) {
+            const gradeMap = {
+                "1ere": "1ère année",
+                "2eme": "2ème année",
+                "3eme": "3ème année",
+                "4eme": "4ème année",
+                "5eme": "5ème année",
+                "6eme": "6ème année"
+            };
+            return gradeMap[gradeKey] || gradeKey;
+        }
+
+        // Mise à jour des graphiques en fonction de la période sélectionnée
+        function updateCharts() {
+            // Cette fonction serait utilisée pour mettre à jour les graphiques
+            // en fonction de la période sélectionnée (hebdomadaire/mensuelle)
+            console.log("Mise à jour des graphiques pour la période sélectionnée");
+        }
+
+        // Mise à jour globale du dashboard
+        function updateDashboard() {
+            // Cette fonction serait utilisée pour mettre à jour tout le dashboard
+            // en fonction des filtres sélectionnés
+            console.log("Mise à jour du dashboard avec les filtres sélectionnés");
+        }
+    </script>
 </body>
 </html>

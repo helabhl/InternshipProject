@@ -90,7 +90,7 @@ def home():
 
 @app.route("/dashboard")
 def dashboard():
-    return render_template("users/dashboard.html")
+    return render_template("admin/dashboard.html")
 
 @app.route("/quizzes")
 def quizzes():

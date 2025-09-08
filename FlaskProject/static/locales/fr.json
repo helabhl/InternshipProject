@@ -1,0 +1,236 @@
+{
+    "common": {
+        "loading": "Chargement...",
+        "error": "Erreur",
+        "success": "Succès",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "close": "Fermer",
+        "back": "Retour",
+        "next": "Suivant",
+        "previous": "Précédent",
+        "submit": "Soumettre",
+        "retry": "Réessayer",
+        "yes": "Oui",
+        "no": "Non"
+    },
+    "navigation": {
+        "home": "Accueil",
+        "tests": "Tests",
+        "reports": "Rapports",
+        "settings": "Paramètres",
+        "dashboard": "Tableau de bord"
+    },
+    "header": {
+        "title": "Ferid Around The World",
+        "language_selector": {
+            "french": "FR",
+            "arabic": "AR",
+            "english": "EN"
+        }
+    },
+    "dashboard": {
+        "page_title": "Tableau de bord",
+        "child_selection": {
+            "loading_children": "Chargement des enfants...",
+            "select_child": "Sélectionner un enfant"
+        },
+        "period_selector": {
+            "weekly": "Hebdomadaire",
+            "monthly": "Mensuel",
+            "this_week": "Cette semaine",
+            "this_month": "Ce mois"
+        },
+        "stats": {
+            "total_tests": "Total des tests",
+            "average_score": "Score moyen",
+            "study_time": "Temps d'étude (min)",
+            "completion_rate": "Taux de complétion"
+        },
+        "charts": {
+            "weekly_progress": "Progrès hebdomadaires",
+            "subject_distribution": "Répartition par matière",
+            "average_score_percent": "Score moyen (%)",
+            "successes_per_day": "Réussites par jour",
+            "score_percent": "Score (%)"
+        },
+        "cards": {
+            "achievements": "Réussites",
+            "alerts": "Alertes",
+            "recommendations": "Recommandations"
+        },
+        "subjects": {
+            "title": "Statistiques par matière",
+            "average_score": "Score moyen",
+            "completed": "Complétés",
+            "score": "Score",
+            "attempts": "Tentatives"
+        }
+    },
+    "messages": {
+        "engagement": {
+            "high": {
+                "title": "Engagement exceptionnel",
+                "desc": "Superbe ! Excellent engagement cette semaine !"
+            },
+            "good": {
+                "title": "Bon engagement",
+                "desc": "Très bien ! Tu as travaillé régulièrement."
+            },
+            "average": {
+                "title": "Engagement moyen",
+                "desc": "Bon début ! Tu peux augmenter encore tes jours d'activité"
+            },
+            "low": {
+                "title": "Participation faible",
+                "desc": "Participation modeste, il faut plus de régularité !"
+            },
+            "none": {
+                "title": "Aucune activité",
+                "desc": "Aucune activité enregistrée. Chaque jour est une chance d'apprendre !"
+            }
+        },
+        "streak": {
+            "seven": {
+                "title": "Série parfaite",
+                "desc": "Incroyable ! 7 succès d'affilée !"
+            },
+            "five": {
+                "title": "Série de 5",
+                "desc": "Bravo ! 5 succès consécutifs !"
+            },
+            "three": {
+                "title": "Série de 3",
+                "desc": "Bien joué ! 3 réussites consécutives"
+            }
+        },
+        "completion": {
+            "excellent": {
+                "title": "Achèvement excellent",
+                "desc": "Excellent ! Presque tous les tests sont terminés !"
+            },
+            "good": {
+                "title": "Bon achèvement",
+                "desc": "Très bon taux d'achèvement !"
+            },
+            "average": {
+                "title": "Achèvement moyen",
+                "desc": "Tu avances bien !"
+            },
+            "started": {
+                "title": "Début de progression",
+                "desc": "Tu as commencé ta progression !"
+            },
+            "low_alert": {
+                "title": "Tests non terminés",
+                "desc": "Beaucoup de tests non terminés, essaie de les finir !"
+            }
+        },
+        "mastery": {
+            "excellent": {
+                "title": "Maîtrise exceptionnelle",
+                "desc": "Maîtrise exceptionnelle !"
+            },
+            "good": {
+                "title": "Très bon niveau",
+                "desc": "Très bon niveau !"
+            },
+            "average": {
+                "title": "Bonne compréhension",
+                "desc": "Bonne compréhension !"
+            },
+            "low_alert": {
+                "title": "Points à améliorer",
+                "desc": "Des points à améliorer, chaque défi est une opportunité !"
+            }
+        },
+        "abandon": {
+            "alert": {
+                "title": "Tests abandonnés",
+                "desc": "Certains tests sont abandonnés"
+            }
+        },
+        "perseverance": {
+            "strong": {
+                "title": "Détermination inspirante",
+                "desc": "Détermination inspirante !"
+            },
+            "good": {
+                "title": "Bonne persévérance",
+                "desc": "Bonne persévérance !"
+            },
+            "retries": {
+                "title": "Répétitions constructives",
+                "desc": "Tes répétitions montrent une vraie volonté d'apprendre !"
+            }
+        },
+        "balance": {
+            "low": {
+                "title": "Équilibre faible",
+                "desc": "Essaie de diversifier les matières"
+            },
+            "good": {
+                "title": "Bon équilibre",
+                "desc": "Bon équilibre entre les matières"
+            }
+        },
+        "time": {
+            "high": {
+                "title": "Temps investi élevé",
+                "desc": "Excellent investissement ! Plus de 5h de travail !"
+            },
+            "medium": {
+                "title": "Temps investi correct",
+                "desc": "Très bien ! Plus de 3h de travail !"
+            },
+            "low": {
+                "title": "Temps investi faible",
+                "desc": "Beau travail ! Continue ainsi"
+            }
+        },
+        "inspiration": {
+            "week": {
+                "title": "Semaine de progrès",
+                "desc": "Une semaine de progrès est une semaine de succès"
+            },
+            "month": {
+                "title": "Mois de constance",
+                "desc": "Un mois de constance est un grand pas vers le succès"
+            }
+        },
+        "defaults": {
+            "achievement": {
+                "title": "Effort récompensé",
+                "desc": "Chaque effort construit ton avenir"
+            },
+            "alert": {
+                "title": "Aucune alerte",
+                "desc": "Aucune alerte, continue comme ça !"
+            },
+            "recommendation": {
+                "title": "Recommandation",
+                "desc": "Garde un rythme d'apprentissage régulier"
+            },
+            "no_activity": {
+                "title": "Aucune activité",
+                "desc": "Aucune activité trouvée pour cette période."
+            }
+        }
+    },
+    "footer": {
+        "copyright": "© 2025 Système de suivi. Tous droits réservés."
+    },
+    "time": {
+        "hours": "h",
+        "minutes": "min",
+        "days": "jours",
+        "weeks": "semaines",
+        "months": "mois"
+    },
+    "date": {
+        "format": "DD/MM/YYYY",
+        "locale": "fr-FR"
+    }
+}

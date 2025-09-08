@@ -1,0 +1,236 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "cancel": "Cancel",
+        "save": "Save",
+        "edit": "Edit",
+        "delete": "Delete",
+        "close": "Close",
+        "back": "Back",
+        "next": "Next",
+        "previous": "Previous",
+        "submit": "Submit",
+        "retry": "Retry",
+        "yes": "Yes",
+        "no": "No"
+    },
+    "navigation": {
+        "home": "Home",
+        "tests": "Tests",
+        "reports": "Reports",
+        "settings": "Settings",
+        "dashboard": "Dashboard"
+    },
+    "header": {
+        "title": "Ferid Around The World",
+        "language_selector": {
+            "french": "FR",
+            "arabic": "AR",
+            "english": "EN"
+        }
+    },
+    "dashboard": {
+        "page_title": "Dashboard",
+        "child_selection": {
+            "loading_children": "Loading children...",
+            "select_child": "Select a child"
+        },
+        "period_selector": {
+            "weekly": "Weekly",
+            "monthly": "Monthly",
+            "this_week": "This week",
+            "this_month": "This month"
+        },
+        "stats": {
+            "total_tests": "Total tests",
+            "average_score": "Average score",
+            "study_time": "Study time (min)",
+            "completion_rate": "Completion rate"
+        },
+        "charts": {
+            "weekly_progress": "Weekly progress",
+            "subject_distribution": "Subject distribution",
+            "average_score_percent": "Average score (%)",
+            "successes_per_day": "Successes per day",
+            "score_percent": "Score (%)"
+        },
+        "cards": {
+            "achievements": "Achievements",
+            "alerts": "Alerts",
+            "recommendations": "Recommendations"
+        },
+        "subjects": {
+            "title": "Subject statistics",
+            "average_score": "Average score",
+            "completed": "Completed",
+            "score": "Score",
+            "attempts": "Attempts"
+        }
+    },
+    "messages": {
+        "engagement": {
+            "high": {
+                "title": "Exceptional engagement",
+                "desc": "Amazing! Excellent engagement this week!"
+            },
+            "good": {
+                "title": "Good engagement",
+                "desc": "Very good! You worked regularly."
+            },
+            "average": {
+                "title": "Average engagement",
+                "desc": "Good start! You can increase your activity days even more"
+            },
+            "low": {
+                "title": "Low participation",
+                "desc": "Modest participation, we need more regularity!"
+            },
+            "none": {
+                "title": "No activity",
+                "desc": "No activity recorded. Every day is a chance to learn!"
+            }
+        },
+        "streak": {
+            "seven": {
+                "title": "Perfect streak",
+                "desc": "Incredible! 7 successes in a row!"
+            },
+            "five": {
+                "title": "5 streak",
+                "desc": "Well done! 5 consecutive successes!"
+            },
+            "three": {
+                "title": "3 streak",
+                "desc": "Good job! 3 consecutive successes"
+            }
+        },
+        "completion": {
+            "excellent": {
+                "title": "Excellent completion",
+                "desc": "Excellent! Almost all tests are completed!"
+            },
+            "good": {
+                "title": "Good completion",
+                "desc": "Very good completion rate!"
+            },
+            "average": {
+                "title": "Average completion",
+                "desc": "You're progressing well!"
+            },
+            "started": {
+                "title": "Beginning of progress",
+                "desc": "You've started your progress!"
+            },
+            "low_alert": {
+                "title": "Incomplete tests",
+                "desc": "Many tests are incomplete, try to finish them!"
+            }
+        },
+        "mastery": {
+            "excellent": {
+                "title": "Exceptional mastery",
+                "desc": "Exceptional mastery!"
+            },
+            "good": {
+                "title": "Very good level",
+                "desc": "Very good level!"
+            },
+            "average": {
+                "title": "Good understanding",
+                "desc": "Good understanding!"
+            },
+            "low_alert": {
+                "title": "Points to improve",
+                "desc": "Points to improve, every challenge is an opportunity!"
+            }
+        },
+        "abandon": {
+            "alert": {
+                "title": "Abandoned tests",
+                "desc": "Some tests are abandoned"
+            }
+        },
+        "perseverance": {
+            "strong": {
+                "title": "Inspiring determination",
+                "desc": "Inspiring determination!"
+            },
+            "good": {
+                "title": "Good perseverance",
+                "desc": "Good perseverance!"
+            },
+            "retries": {
+                "title": "Constructive retries",
+                "desc": "Your retries show a real willingness to learn!"
+            }
+        },
+        "balance": {
+            "low": {
+                "title": "Weak balance",
+                "desc": "Try to diversify subjects"
+            },
+            "good": {
+                "title": "Good balance",
+                "desc": "Good balance between subjects"
+            }
+        },
+        "time": {
+            "high": {
+                "title": "High time investment",
+                "desc": "Excellent investment! More than 5 hours of work!"
+            },
+            "medium": {
+                "title": "Proper time investment",
+                "desc": "Very good! More than 3 hours of work!"
+            },
+            "low": {
+                "title": "Low time investment",
+                "desc": "Good work! Keep it up"
+            }
+        },
+        "inspiration": {
+            "week": {
+                "title": "Week of progress",
+                "desc": "A week of progress is a week of success"
+            },
+            "month": {
+                "title": "Month of consistency",
+                "desc": "A month of consistency is a big step towards success"
+            }
+        },
+        "defaults": {
+            "achievement": {
+                "title": "Rewarded effort",
+                "desc": "Every effort builds your future"
+            },
+            "alert": {
+                "title": "No alerts",
+                "desc": "No alerts, keep it up!"
+            },
+            "recommendation": {
+                "title": "Recommendation",
+                "desc": "Keep a regular learning pace"
+            },
+            "no_activity": {
+                "title": "No activity",
+                "desc": "No activity found for this period."
+            }
+        }
+    },
+    "footer": {
+        "copyright": "© 2025 Tracking System. All rights reserved."
+    },
+    "time": {
+        "hours": "h",
+        "minutes": "min",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months"
+    },
+    "date": {
+        "format": "MM/DD/YYYY",
+        "locale": "en-US"
+    }
+}

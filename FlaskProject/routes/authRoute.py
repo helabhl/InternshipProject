@@ -6,7 +6,7 @@ from bson import ObjectId
 auth_bp = Blueprint("auth", __name__)
 
 
-@auth_bp.route("/login_sms", methods=["GET", "POST"])
+@auth_bp.route("/login", methods=["GET", "POST"])
 def login_sms():
     if request.method == "POST":
         user_id = request.form.get("userID")
@@ -14,11 +14,12 @@ def login_sms():
 
         if status != 200:
             flash(response["error"], "danger")
-            return render_template("users/login_sms.html")
+            return render_template("users/login.html")
 
         return redirect(url_for("auth.verify"))
 
-    return render_template("users/login_sms.html")
+    return render_template("users/login.html")
+
 
 
 @auth_bp.route("/verify", methods=["GET", "POST"])
@@ -44,8 +45,16 @@ def verify():
             account_dict = convert_objectid(response["account"])
             # Stocker dans la session
             session['account'] = account_dict
-            return redirect(url_for("accountsdatas.home"))
+            return redirect(url_for("accountsdatas.dashboard"))
         else:
             flash(response["error"], "danger")
 
     return render_template("users/verify.html")
+
+
+@auth_bp.route("/auth", methods=["GET"])
+def validate():
+    account = session.get("account")
+    if not account:
+        return jsonify({"authenticated": False}), 401
+    return jsonify({"authenticated": True, "account": account}), 200

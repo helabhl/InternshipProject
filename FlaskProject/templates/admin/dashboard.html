@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - Engagement des Quiz</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Dashboard Admin</title>
+    <!-- Font Awesome local -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/all.min.css') }}">
+    <!-- Chart.js local -->
+    <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+    <!-- Localization System -->
+    <script src="{{ url_for('static', filename='js/localization.js') }}"></script>
     <style>
         :root {
             --primary: #6a11cb;
@@ -502,38 +505,17 @@
     <!-- Header -->
     <header>
         <div class="header-content">
-            <div class="logo">
-                <i class="bi bi-graph-up"></i>
-                <h1>Dashboard Admin - Engagement Quiz</h1>
+           <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h1 data-i18n="header.title">Ferid Around The World</h1>
             </div>
 
-            <nav>
-                <ul>
-                    <li><a href="#" class="active"><i class="bi bi-speedometer2"></i> Tableau de bord</a></li>
-                    <li><a href="#"><i class="bi bi-people"></i> Utilisateurs</a></li>
-                    <li><a href="#"><i class="bi bi-journals"></i> Contenus</a></li>
-                    <li><a href="#"><i class="bi bi-gear"></i> Paramètres</a></li>
-                </ul>
-            </nav>
+           
         </div>
     </header>
 
     <!-- Main Content -->
     <div class="dashboard-container">
-        <!-- Page header -->
-        <div class="page-header">
-            <div class="header-title">
-                <h2>Statistiques d'engagement des quiz</h2>
-                <p>Analyse des élèves ayant essayé des quiz par année, sujet et chapitre</p>
-            </div>
-            
-            <div class="period-selector">
-                <div class="period-buttons">
-                    <button class="period-btn active" data-period="week">Hebdomadaire</button>
-                    <button class="period-btn" data-period="month">Mensuel</button>
-                </div>
-            </div>
-        </div>
 
         <!-- Filters -->
         <div class="filters-container">

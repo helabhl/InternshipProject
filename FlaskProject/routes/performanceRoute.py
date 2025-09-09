@@ -15,3 +15,4 @@ def metrics(userId, kidIndex):
 def weekly_scores(userId, kidIndex):
     return PerformanceController.get_weekly_average_scores(userId, kidIndex)
 
+

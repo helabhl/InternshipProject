@@ -5,7 +5,7 @@
 
 class LocalizationSystem {
     constructor() {
-        this.currentLanguage = 'fr'; // Default language
+        this.currentLanguage = 'ar'; // Default language
         this.translations = {};
         this.rtlLanguages = ['ar'];
         this.isRTL = false;

@@ -231,6 +231,6 @@
     },
     "date": {
         "format": "DD/MM/YYYY",
-        "locale": "ar-SA"
+        "locale": "ar-TN"
     }
 }

@@ -40,11 +40,16 @@ def get_kids_names_route(user_id):
     response, status = get_kids_names(user_id)
     return jsonify(response), status
 
-@accounts_bp.route("/home")
-def home():
-    account = session.get('account')
+
+
+@accounts_bp.route("/dashboard")
+def dashboard():
+    account = session.get("account")
+
     if not account:
-        # Rediriger si pas connecté
+        if request.accept_mimetypes.accept_json:
+            return jsonify({"error": "Not authenticated"}), 401
         return redirect(url_for("auth.login_sms"))
-        return render_template("users/home.html", parent=account)
-    return render_template("users/home.html", parent=account)
+
+    return render_template("users/dashboard.html", parent=account)
+

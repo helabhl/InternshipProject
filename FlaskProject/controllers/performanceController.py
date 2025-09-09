@@ -78,7 +78,6 @@ class PerformanceController:
                 "streak": calculate_streak(kid_attempts),
                 "completion_rate": calculate_completion_rate(kid_attempts),
                 "abandon_rate": abandonment_rate(kid_attempts),
-                "progress": calculate_progress(kid_attempts, from_date, to_date, period=period),
                 "mastery": calculate_mastery(kid_attempts, quizzes_dict),
                 "perseverance": calculate_perseverance(kid_attempts),
                 "subject_balance": calculate_balance_score(kid_subject_stats),
@@ -223,14 +222,13 @@ class PerformanceController:
                 "streak": calculate_streak(kid_attempts),
                 "completion_rate": calculate_completion_rate(kid_attempts),
                 "abandon_rate": abandonment_rate(kid_attempts),
-                "progress": calculate_progress(kid_attempts, from_date, to_date, period="week"),
                 "mastery": calculate_mastery(kid_attempts, quizzes_dict),
                 "perseverance": calculate_perseverance(kid_attempts),
-                "chapter_distribution": chapter_distribution(kid_attempts, quizzes_dict),
                 "persistent_failures": persistent_failures(kid_attempts),
                 "subject_stats": kid_subject_stats,
                 "subject_balance": calculate_balance_score(kid_subject_stats),
-                "recommendation": recommend_subject(kid_subject_stats)
+                "recommendation": recommend_subject(kid_subject_stats),
+                "grade_stats": grade_stats(kid_attempts, quizzes_dict)
             }
 
             return jsonify(metrics), 200
@@ -238,61 +236,6 @@ class PerformanceController:
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
-    @staticmethod
-    def get_performance(userId, kidIndex):
-        """Retourne les données de performance pour les graphiques"""
-        try:
-            from_str = request.args.get("from")
-            to_str = request.args.get("to")
-            to_date = datetime.now(timezone.utc) if not to_str else parse_date(to_str)
-            from_date = to_date - timedelta(days=7) if not from_str else parse_date(from_str)
-
-            if not from_date or not to_date:
-                return jsonify({"error": "Dates invalides"}), 400
-
-            attempts = AttemptData.objects(
-                userID=userId,
-                kidIndex=kidIndex,
-                start_time__gte=from_date,
-                start_time__lte=to_date
-            )
-
-            if not attempts:
-                return jsonify({"message": "Aucune tentative"}), 200
-
-            data = []
-            for att in attempts:
-                data.append({
-                    "quizID": str(att.quizID),
-                    "start_time": att.start_time,
-                    "end_time": att.end_time,
-                    "completed": att.completed,
-                    "failed": att.failed,
-                    "abandoned": att.aborted,
-                    "score": getattr(att, "score", None),
-                    "duration": att.duration
-                })
-            df = pd.DataFrame(data)
-
-            lineplot = df[df["score"].notna()][["quizID", "score", "start_time"]] \
-                .sort_values("start_time") \
-                .to_dict(orient="records")
-
-            df["weekday"] = df["start_time"].dt.strftime("%A")
-            barplot = df.groupby("weekday")["quizID"].count().to_dict()
-
-            result = {
-                "lineplot": [
-                    {"quizID": r["quizID"], "score": float(r["score"]), "start_time": r["start_time"].isoformat()}
-                    for r in lineplot
-                ],
-                "barplot": {k: int(v) for k, v in barplot.items()}
-            }
-
-            return jsonify(result), 200
-
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
 
     @staticmethod
     def get_weekly_average_scores(userID, kidIndex):
@@ -335,15 +278,191 @@ class PerformanceController:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
-    def get_subject_distribution(userID, kidIndex):
-        """Retourne la répartition des scores par matière"""
+    def get_grade_stats(userID, kidIndex):
+        """Statistiques par niveau, matière et chapitre"""
+        """Retourne les métriques de performance détaillées"""
         try:
-            return get_subject_distribution(userID, kidIndex)
+            from_str = request.args.get("from")
+            to_str = request.args.get("to")
+            from_date = parse_date(from_str) if from_str else None
+            to_date = parse_date(to_str) if to_str else None
+
+            query = {"userID": userID, "kidIndex": kidIndex}
+            if from_date and to_date:
+                query["start_time__gte"] = from_date
+                query["start_time__lte"] = to_date
+
+            attempts_list = AttemptData.objects(**query)
+            kid_attempts = [a.to_mongo().to_dict() for a in attempts_list]
+            
+            if not kid_attempts:
+                return jsonify({"message": "Aucune tentative trouvée"}), 200
+            
+            # Extraire tous les quizID uniques
+            quiz_ids = list(set(str(attempt.get("quizID")) for attempt in kid_attempts if attempt.get("quizID")))
+            
+            if not quiz_ids:
+                return jsonify({"message": "Aucun quizID valide trouvé"}), 200
+            
+            # Appeler l'API une seule fois avec tous les IDs
+            quizzes = Quiz.objects(id__in=quiz_ids).only('subject', 'chapter', 'grade')
+            quizzes_dict = {str(q.id): {"subject": q.subject, "chapter": q.chapter, "grade": q.grade} 
+                          for q in quizzes}
+            
+            grade_stats = {}
+            
+            for attempt in kid_attempts:
+                try:
+                    quiz_id = str(attempt.get("quizID", ""))
+                    if not quiz_id or quiz_id not in quizzes_dict:
+                        continue
+                        
+                    quiz_data = quizzes_dict[quiz_id]
+                    grade = quiz_data.get("grade", "Inconnu")
+                    subject = quiz_data.get("subject", "Inconnu")
+                    chapter = quiz_data.get("chapter", "Inconnu")
+                    
+                    score = float(attempt.get("score", 0))
+                    completed = 1 if attempt.get("completed", 0) == 1 else 0
+                    
+                    # Initialiser le niveau
+                    if grade not in grade_stats:
+                        grade_stats[grade] = {}
+                    
+                    # Initialiser la matière dans le niveau
+                    if subject not in grade_stats[grade]:
+                        grade_stats[grade][subject] = {
+                            "count": 0,
+                            "completed": 0,
+                            "total_score": 0.0,
+                            "average_score": 0.0,
+                            "chapters": {}
+                        }
+                    
+                    # Initialiser le chapitre dans la matière
+                    if chapter not in grade_stats[grade][subject]["chapters"]:
+                        grade_stats[grade][subject]["chapters"][chapter] = {
+                            "count": 0,
+                            "completed": 0,
+                            "total_score": 0.0,
+                            "average_score": 0.0
+                        }
+                    
+                    # Mettre à jour les statistiques de la matière
+                    subject_stats = grade_stats[grade][subject]
+                    subject_stats["count"] += 1
+                    subject_stats["completed"] += completed
+                    subject_stats["total_score"] += score
+                    
+                    # Mettre à jour les statistiques du chapitre
+                    chapter_stats = grade_stats[grade][subject]["chapters"][chapter]
+                    chapter_stats["count"] += 1
+                    chapter_stats["completed"] += completed
+                    chapter_stats["total_score"] += score
+                    
+                except (KeyError, TypeError, ValueError) as e:
+                    print(f"Erreur lors du traitement de l'attempt: {e}")
+                    continue
+            
+            # Calculer les moyennes finales
+            for grade in grade_stats:
+                for subject in grade_stats[grade]:
+                    subject_stats = grade_stats[grade][subject]
+                    
+                    # Calculer la moyenne pour la matière
+                    if subject_stats["count"] > 0:
+                        subject_stats["average_score"] = round(subject_stats["total_score"] / subject_stats["count"], 4)
+                    del subject_stats["total_score"]
+                    
+                    # Calculer les moyennes pour chaque chapitre
+                    for chapter in subject_stats["chapters"]:
+                        chapter_stats = subject_stats["chapters"][chapter]
+                        if chapter_stats["count"] > 0:
+                            chapter_stats["average_score"] = round(chapter_stats["total_score"] / chapter_stats["count"], 4)
+                        del chapter_stats["total_score"]
+            
+            return grade_stats
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
 
 # ===== FONCTIONS UTILITAIRES =====
+
+def grade_stats(attempts, quizzes_dict):
+    """Statistiques par niveau, matière et chapitre"""
+    grade_stats = {}
+    
+    for attempt in attempts:
+        try:
+            quiz_id = str(attempt.get("quizID", ""))
+            if not quiz_id or quiz_id not in quizzes_dict:
+                continue
+                
+            quiz_data = quizzes_dict[quiz_id]
+            grade = quiz_data.get("grade", "Inconnu")
+            subject = quiz_data.get("subject", "Inconnu")
+            chapter = quiz_data.get("chapter", "Inconnu")
+            
+            score = float(attempt.get("score", 0))
+            completed = 1 if attempt.get("completed", 0) == 1 else 0
+            
+            # Initialiser le niveau
+            if grade not in grade_stats:
+                grade_stats[grade] = {}
+            
+            # Initialiser la matière dans le niveau
+            if subject not in grade_stats[grade]:
+                grade_stats[grade][subject] = {
+                    "count": 0,
+                    "completed": 0,
+                    "total_score": 0.0,
+                    "average_score": 0.0,
+                    "chapters": {}
+                }
+            
+            # Initialiser le chapitre dans la matière
+            if chapter not in grade_stats[grade][subject]["chapters"]:
+                grade_stats[grade][subject]["chapters"][chapter] = {
+                    "count": 0,
+                    "completed": 0,
+                    "total_score": 0.0,
+                    "average_score": 0.0
+                }
+            
+            # Mettre à jour les statistiques de la matière
+            subject_stats = grade_stats[grade][subject]
+            subject_stats["count"] += 1
+            subject_stats["completed"] += completed
+            subject_stats["total_score"] += score
+            
+            # Mettre à jour les statistiques du chapitre
+            chapter_stats = grade_stats[grade][subject]["chapters"][chapter]
+            chapter_stats["count"] += 1
+            chapter_stats["completed"] += completed
+            chapter_stats["total_score"] += score
+            
+        except (KeyError, TypeError, ValueError) as e:
+            print(f"Erreur lors du traitement de l'attempt: {e}")
+            continue
+    
+    # Calculer les moyennes finales
+    for grade in grade_stats:
+        for subject in grade_stats[grade]:
+            subject_stats = grade_stats[grade][subject]
+            
+            # Calculer la moyenne pour la matière
+            if subject_stats["count"] > 0:
+                subject_stats["average_score"] = round(subject_stats["total_score"] / subject_stats["count"], 4)
+            del subject_stats["total_score"]
+            
+            # Calculer les moyennes pour chaque chapitre
+            for chapter in subject_stats["chapters"]:
+                chapter_stats = subject_stats["chapters"][chapter]
+                if chapter_stats["count"] > 0:
+                    chapter_stats["average_score"] = round(chapter_stats["total_score"] / chapter_stats["count"], 4)
+                del chapter_stats["total_score"]
+    
+    return grade_stats
 
 def parse_date(date_str):
     """Parse une date string en objet datetime avec gestion d'erreurs"""
@@ -395,38 +514,6 @@ def calculate_completion_rate(attempts):
     total = len(attempts)
     return completed, total
 
-def calculate_progress(attempts, from_date, to_date, period="week"):
-    """Compare le nombre de quizzes complétés avec la période précédente"""
-    if not attempts or not from_date or not to_date:
-        return 0.0
-        
-    if period == "week":
-        delta = timedelta(days=7)
-    elif period == "month":
-        delta = timedelta(days=30)
-    else:
-        raise ValueError("Period doit être 'week' ou 'month'.")
-
-    current_period = [
-        a for a in attempts
-        if a.get("completed") and from_date <= a["start_time"] <= to_date
-    ]
-
-    prev_from = from_date - delta
-    prev_to = from_date - timedelta(seconds=1)
-    prev_period = [
-        a for a in attempts
-        if a.get("completed") and prev_from <= a["start_time"] <= prev_to
-    ]
-
-    current_count = len(current_period)
-    prev_count = len(prev_period)
-
-    if prev_count == 0:
-        return 1.0
-
-    return (current_count - prev_count) / prev_count
-
 def calculate_perseverance(attempts):
     """Retourne les statistiques de persévérance"""
     if not attempts or len(attempts) < 2:
@@ -444,8 +531,7 @@ def calculate_perseverance(attempts):
         if prev["quizID"] == current["quizID"]:
             if prev.get("aborted", 0) == 1 or prev.get("score", 0) < 0.5:
                 retries += 1
-                if (current.get("completed", 0) == 1 and 
-                    (current.get("score", 0) - prev.get("score", 0) >= 0.2 or prev.get("completed", 0) == 0)):
+                if  current.get("score", 0) - prev.get("score", 0) >= 0.2 :
                     improved += 1
     
     return {
@@ -481,7 +567,7 @@ def persistent_failures(attempts):
         
     failed_quizzes = {}
     for a in attempts:
-        if a.get("failed") == 1 or (a.get("completed") == 1 and a.get("score", 0) < 0.4):
+        if a.get("failed") == 1 :
             quiz_id = str(a.get("quizID"))
             failed_quizzes[quiz_id] = failed_quizzes.get(quiz_id, 0) + 1
     return {k: v for k, v in failed_quizzes.items() if v >= 3}
@@ -508,40 +594,6 @@ def get_subject_from_quiz(attempt, quizzes_dict):
     quiz_id = str(attempt.get("quizID"))
     quiz_data = quizzes_dict.get(quiz_id)
     return quiz_data.get("subject", "Inconnu") if quiz_data else "Inconnu"
-
-def chapter_distribution(attempts, quizzes_dict):
-    """Distribution des tentatives par chapitre"""
-    distribution = {}
-
-    for a in attempts:
-        quiz_id = str(a.get("quizID"))
-        quiz_data = quizzes_dict.get(quiz_id)
-        
-        if quiz_data:
-            subject = quiz_data.get("subject", "inconnu")
-            chapter = quiz_data.get("chapter", "inconnu")
-        else:
-            subject = "inconnu"
-            chapter = "inconnu"
-
-        if subject not in distribution:
-            distribution[subject] = {}
-
-        if chapter not in distribution[subject]:
-            distribution[subject][chapter] = {"attempts": 0, "total_score": 0}
-
-        distribution[subject][chapter]["attempts"] += 1
-        if a.get("score") is not None:
-            distribution[subject][chapter]["total_score"] += a.get("score", 0)
-
-    for subject, chapters in distribution.items():
-        for chapter, stats in chapters.items():
-            stats["average_score"] = (
-                stats["total_score"] / stats["attempts"] if stats["attempts"] > 0 else 0
-            )
-            del stats["total_score"]
-
-    return distribution
 
 def subject_stats(attempts, quizzes_dict):
     """Statistiques par matière"""
@@ -579,37 +631,8 @@ def calculate_mastery(attempts, quizzes_dict):
     mastery = {
         subject: sum(scores) / len(scores)
         for subject, scores in subject_scores.items()
-        if len(scores) > 0 and sum(scores) / len(scores) >= 0.7
+        if len(scores) > 20 and sum(scores) / len(scores) >= 0.7
     }
     return mastery
 
-def get_subject_distribution(userID, kidIndex):
-    """Répartition des scores par matière"""
-    try:
-        attempts = AttemptData.objects(userID=userID, kidIndex=kidIndex)
-        kid_attempts = [a.to_mongo().to_dict() for a in attempts]
-        
-        if not kid_attempts:
-            return jsonify({"labels": [], "data": []})
-        
-        quiz_ids = list(set(str(attempt.get("quizID")) for attempt in kid_attempts if attempt.get("quizID")))
-        
-        if not quiz_ids:
-            return jsonify({"labels": ["Inconnu"], "data": [len(kid_attempts)]})
-        
-        quizzes = Quiz.objects(id__in=quiz_ids).only('subject', 'chapter', 'grade')
-        quizzes_dict = {str(q.id): {"subject": q.subject, "chapter": q.chapter, "grade": q.grade} 
-                      for q in quizzes}
-        
-        subjects = {}
-        for att in kid_attempts:
-            subj = get_subject_from_quiz(att, quizzes_dict)
-            subjects[subj] = subjects.get(subj, 0) + 1
 
-        labels = list(subjects.keys())
-        values = list(subjects.values())
-
-        return jsonify({"labels": labels, "data": values})
-    
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500

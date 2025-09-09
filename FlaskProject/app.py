@@ -84,25 +84,22 @@ def create_admin():
     print("✅ Admin créé avec succès")
 
 # --- Routes ---
-@app.route("/home")
+@app.route("/")
 def home():
-    return render_template("users/home.html")
-
-@app.route("/dashboard")
-def dashboard():
-    return render_template("admin/dashboard.html")
-
-@app.route("/quizzes")
-def quizzes():
-    return render_template("users/quiz.html")
+    return render_template("users/login.html")
 
 @app.route("/quiz")
 def quiz():
     return render_template("quiz.html")
 
-@app.route("/subject")
-def subject():
-    return render_template("users/subjects.html")
+@app.route("/dashboard_admin")
+def dashboard_admin():
+    return render_template("admin/dashboard.html")
+
+
+@app.route("/login_admin")
+def login():
+    return render_template("admin/login.html")
 
 # --- Run the app ---
 if __name__ == "__main__":

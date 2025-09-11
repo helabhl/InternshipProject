@@ -233,7 +233,7 @@ class LocalizationSystem {
     getLocale() {
         const localeMap = {
             'fr': 'fr-FR',
-            'ar': 'ar-SA',
+            'ar': 'ar-TN',
             'en': 'en-US'
         };
         return localeMap[this.currentLanguage] || 'fr-FR';

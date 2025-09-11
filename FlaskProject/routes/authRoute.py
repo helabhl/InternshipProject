@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, session, redirect, url_for, render_template, flash
-from controllers.authController import login_sms_logic, verify_logic
+from controllers.authController import  login_sms_logic, verify_logic
 from models.account import AccountData
 from bson import ObjectId
 
@@ -52,9 +52,13 @@ def verify():
     return render_template("users/verify.html")
 
 
-@auth_bp.route("/auth", methods=["GET"])
-def validate():
-    account = session.get("account")
-    if not account:
-        return jsonify({"authenticated": False}), 401
-    return jsonify({"authenticated": True, "account": account}), 200
+@auth_bp.route("/auth/dashboard/<userID>", methods=["GET"])
+def get_dashboard(userID): 
+    if not userID: 
+        return "userID is required", 400 
+    account = AccountData.objects(userID=userID).first() 
+    if not account: 
+        return "User not found", 404 
+    # On passe l'objet account au template dashboard.html 
+    return render_template("users/dashboard.html", parent=account)
+   

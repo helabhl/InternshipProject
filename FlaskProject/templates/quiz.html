@@ -735,9 +735,9 @@
 
     <script>
         // Configuration
-        const USER_ID = '+14388864855';
+        const USER_ID = '+14384599222';
         const KID_INDEX = '0';
-        const QUIZ_ID = '68b70a682f28f00081beab14';
+        const QUIZ_ID = '679004048ad73b1596db5f46';
         const API_BASE_URL = "http://127.0.0.1:5000";
         
         // Variables globales
@@ -837,12 +837,15 @@
                         }
                         return s.txt.replace(/<[^>]*>/g, ''); // Nettoyer le HTML
                     });
+                    let duration = 20
                     
                     return {
                         question: q.txt,
                         options: options,
                         correctAnswer: correctAnswerIndex,
-                        hint: q.hint
+                        hint: q.hint,
+                        duration: questionTimeElapsed
+
                     };
                 });
                 
@@ -1064,7 +1067,8 @@
                 is_correct: isCorrect ? 1 : 0,
                 is_wrong: isCorrect ? 0 : 1,
                 response_value: quizData[currentQuestionIndex].options[selectedOptionIndex],
-                is_starting: false
+                is_starting: false,
+                duration: questionTimeElapsed
             });
         }
 

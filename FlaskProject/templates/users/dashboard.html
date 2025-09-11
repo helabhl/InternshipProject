@@ -828,6 +828,8 @@
         let currentPeriod = "week";
         let currentDate = new Date();
 
+
+
         console.log("User ID:", userID);
         console.log("Kid Index:", kidIndex);
 
@@ -839,25 +841,7 @@
 
         // Attendre que le DOM soit complètement chargé
         document.addEventListener('DOMContentLoaded', async function () {
-            try {
-                // 1️⃣ Vérifier si l'utilisateur est connecté
-                const res = await fetch("/auth");
-                if (!res.ok) {
-                    // Si non connecté, on renvoie vers la page de login
-                    window.location.href = "/login";
-                    return;
-                }
-
-                const data = await res.json();
-                if (!data.authenticated) {
-                    window.location.href = "/login";
-                    return;
-                }
-
-                // 2️⃣ Si valide → récupérer l'account (parent) injecté par Flask
-                console.log("✅ Utilisateur authentifié:", data.user);
-
-                // 3️⃣ Initialiser la page seulement après validation
+            // Initialiser la page seulement après validation
                 await window.i18n.init();
                 window.i18n.loadSavedLanguage();
 
@@ -868,10 +852,7 @@
                 loadNameKids(userID);
                 setupEventListeners();
                 updateDisplayedData();
-            } catch (err) {
-                console.error("💥 Erreur lors de la validation auth:", err);
-                window.location.href = "/login";
-            }
+            
         });
 
         // Charger la liste des enfants
@@ -906,7 +887,6 @@
 
                 // 5️⃣ Boucle pour ajouter les options enfants
                 Object.entries(data).forEach(([idx, name]) => {
-                    console.log(`👶 Ajout enfant index=${idx}, prénom=${name}`);
                     const option = document.createElement("option");
                     option.value = idx;
                     option.textContent = name;
@@ -992,6 +972,17 @@
                 }
                 updateDisplayedData();
             });
+        }
+
+
+        function updateChartTitle(currentPeriod) {
+            const titleElement = document.getElementById('chart-title-text');
+
+            if (currentPeriod === 'week') {
+                titleElement.textContent = "التقدم الأسبوعي"; // Weekly Progress
+            } else if (currentPeriod === 'month') {
+                titleElement.textContent = "التقدم الشهري"; // Monthly Progress
+            }
         }
 
         // Fonction pour obtenir les dates de début et fin selon la période
@@ -1250,7 +1241,7 @@
                 return;
             }
 
-            fetch(`/user/${userID}/kid/${kidIndex}/weekly-scores?from=${fromStr}&to=${toStr}&period=${currentPeriod}`)
+            fetch(`/user/${userID}/kid/${kidIndex}/scores?from=${fromStr}&to=${toStr}&period=${currentPeriod}`)
                 .then(res => {
                     if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
                     return res.json();

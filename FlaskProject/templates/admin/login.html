@@ -36,39 +36,23 @@
         <div class="card shadow-2-strong" style="border-radius: 1rem;">
           <div class="card-body p-5 text-center">
 
-            <h3 class="mb-5">Sign in</h3>
-            <!-- Affiche les messages flash -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                <div>
-                  {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                      {{ message }}
-                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                  {% endfor %}
+                <h3 class="mb-5">Sign in</h3>
+                <form method="POST" action="{{ url_for('admin.login_admin') }}">
+
+                <div data-mdb-input-init class="form-outline mb-4">
+                  <input type="email" name="email" id="typeEmailX-2" class="form-control form-control-lg" required />
+                  <label class="form-label" for="typeEmailX-2">Email</label>
                 </div>
-              {% endif %}
-            {% endwith %}
-          <form method="POST" action="{{ url_for('admin.login_admin') }}">
 
-  <div data-mdb-input-init class="form-outline mb-4">
-    <input type="email" name="email" id="typeEmailX-2" class="form-control form-control-lg" required />
-    <label class="form-label" for="typeEmailX-2">Email</label>
-  </div>
+                <div data-mdb-input-init class="form-outline mb-4">
+                  <input type="password" name="password" id="typePasswordX-2" class="form-control form-control-lg" required />
+                  <label class="form-label" for="typePasswordX-2">Password</label>
+                </div>
 
-  <div data-mdb-input-init class="form-outline mb-4">
-    <input type="password" name="password" id="typePasswordX-2" class="form-control form-control-lg" required />
-    <label class="form-label" for="typePasswordX-2">Password</label>
-  </div>
-
-  <button data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg btn-block" type="submit">
-    Login
-  </button>
-</form>
-
-
-            
+                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg btn-block" type="submit">
+                  Login
+                </button>
+              </form>
           </div>
         </div>
       </div>

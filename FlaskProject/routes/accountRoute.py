@@ -47,8 +47,6 @@ def dashboard():
     account = session.get("account")
 
     if not account:
-        if request.accept_mimetypes.accept_json:
-            return jsonify({"error": "Not authenticated"}), 401
         return redirect(url_for("auth.login_sms"))
 
     return render_template("users/dashboard.html", parent=account)

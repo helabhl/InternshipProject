@@ -1,4 +1,4 @@
-from flask import session
+from flask import render_template, session
 from models.account import AccountData
 
 

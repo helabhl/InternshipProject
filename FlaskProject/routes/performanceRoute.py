@@ -11,8 +11,8 @@ def messages_codes(userId, kidIndex):
 def metrics(userId, kidIndex):
     return PerformanceController.get_metrics(userId, kidIndex)
 
-@performance_bp.route("/user/<userId>/kid/<kidIndex>/weekly-scores", methods=["GET"])
+@performance_bp.route("/user/<userId>/kid/<kidIndex>/scores", methods=["GET"])
 def weekly_scores(userId, kidIndex):
-    return PerformanceController.get_weekly_average_scores(userId, kidIndex)
+    return PerformanceController.get_average_scores(userId, kidIndex)
 
 

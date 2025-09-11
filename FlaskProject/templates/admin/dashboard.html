@@ -499,6 +499,58 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .chapters-list {
+    margin-top: 1rem;
+}
+
+.chapters-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.chapter-item {
+    padding: 0.8rem 0;
+    border-bottom: 1px dashed #f1f2f6;
+}
+
+.chapter-name {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.chapter-stats {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.chapter-stat {
+    text-align: center;
+    flex: 1;
+}
+
+.chapter-stat-value {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--dark);
+}
+
+.chapter-stat-label {
+    font-size: 0.7rem;
+    color: var(--gray);
+    margin-top: 0.2rem;
+}
+
+.no-chapters, .no-data {
+    text-align: center;
+    color: var(--gray);
+    font-style: italic;
+    padding: 1rem;
+    font-size: 0.9rem;
+}
     </style>
 </head>
 <body>
@@ -509,8 +561,6 @@
                 <i class="fas fa-graduation-cap"></i>
                 <h1 data-i18n="header.title">Ferid Around The World</h1>
             </div>
-
-           
         </div>
     </header>
 
@@ -524,24 +574,25 @@
                     <label class="filter-label">Année scolaire</label>
                     <select class="filter-select" id="grade-filter">
                         <option value="all">Toutes les années</option>
-                        <option value="1ere">1ère année</option>
-                        <option value="2eme">2ème année</option>
-                        <option value="3eme">3ème année</option>
-                        <option value="4eme">4ème année</option>
-                        <option value="5eme">5ème année</option>
-                        <option value="6eme">6ème année</option>
+                        <option value="السنة الأولى">1ère année</option>
+                        <option value="السنة الثانية">2ème année</option>
+                        <option value="السنة الثالثة">3ème année</option>
+                        <option value="السنة الرابعة">4ème année</option>
+                        <option value="السنة الخامسة">5ème année</option>
+                        <option value="السنة السادسة">6ème année</option>
                     </select>
                 </div>
                 
                 <div class="filter-group">
-                    <label class="filter-label">Sujet</label>
+                    <label class="filter-label">Matière</label>
                     <select class="filter-select" id="subject-filter">
-                        <option value="all">Tous les sujets</option>
-                        <option value="math">Mathématiques</option>
-                        <option value="science">Sciences</option>
-                        <option value="history">Histoire</option>
-                        <option value="geography">Géographie</option>
-                        <option value="literature">Littérature</option>
+                        <option value="all">Toutes les matières</option>
+                        <option value="اللغة العربية">Arabe</option>
+                        <option value="اللغة الإنجليزية">Anglais</option>
+                        <option value="الرياضيات">Mathématiques</option>
+                        <option value="العلوم">Sciences</option>
+                        <option value="التاريخ">Histoire</option>
+                        <option value="الجغرافيا">Géographie</option>
                     </select>
                 </div>
                 
@@ -561,22 +612,22 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <i class="bi bi-people"></i>
-                <h3 id="total-students">1,243</h3>
+                <h3 id="total-students">0</h3>
                 <p>Élèves actifs</p>
             </div>
             <div class="stat-card">
                 <i class="bi bi-check-circle"></i>
-                <h3 id="quiz-attempts">8,742</h3>
+                <h3 id="quiz-attempts">0</h3>
                 <p>Tentatives de quiz</p>
             </div>
             <div class="stat-card">
                 <i class="bi bi-bar-chart"></i>
-                <h3 id="avg-score">72.4%</h3>
+                <h3 id="avg-score">0%</h3>
                 <p>Score moyen</p>
             </div>
             <div class="stat-card">
                 <i class="bi bi-clock"></i>
-                <h3 id="avg-time">12.7</h3>
+                <h3 id="avg-time">0</h3>
                 <p>Temps moyen (min)</p>
             </div>
         </div>
@@ -595,7 +646,7 @@
             <div class="chart-card">
                 <div class="chart-title">
                     <i class="bi bi-pie-chart-fill"></i>
-                    <span>Répartition par sujet</span>
+                    <span>Répartition par matière</span>
                 </div>
                 <div class="chart-container">
                     <canvas id="subjectChart"></canvas>
@@ -607,7 +658,7 @@
         <div class="subject-stats">
             <div class="chart-title">
                 <i class="bi bi-book"></i>
-                <span>Sujets et répartition par année</span>
+                <span>Matières et répartition par année</span>
             </div>
             <div class="subject-grid" id="subjectStatsContainer">
                 <!-- Les cartes des matières seront générées ici par JavaScript -->
@@ -616,166 +667,111 @@
     </div>
 
     <script>
-        // Données simulées pour le dashboard avec années scolaires
-        const quizData = {
-            grades: {
-                "1ere": { students: 220, attempts: 1050, avgScore: 65.2, avgTime: 10.3 },
-                "2eme": { students: 210, attempts: 1100, avgScore: 68.5, avgTime: 11.2 },
-                "3eme": { students: 195, attempts: 980, avgScore: 70.8, avgTime: 12.1 },
-                "4eme": { students: 185, attempts: 920, avgScore: 72.4, avgTime: 13.5 },
-                "5eme": { students: 175, attempts: 890, avgScore: 75.1, avgTime: 14.2 },
-                "6eme": { students: 165, attempts: 802, avgScore: 77.3, avgTime: 15.0 }
-            },
-            subjects: {
-                math: { 
-                    students: 620, 
-                    attempts: 3250, 
-                    avgScore: 74.3, 
-                    grades: {
-                        "1ère année": { students: 120, attempts: 650 },
-                        "2ème année": { students: 115, attempts: 620 },
-                        "3ème année": { students: 110, attempts: 580 },
-                        "4ème année": { students: 100, attempts: 520 },
-                        "5ème année": { students: 95, attempts: 480 },
-                        "6ème année": { students: 80, attempts: 400 }
-                    }
-                },
-                science: { 
-                    students: 480, 
-                    attempts: 2450, 
-                    avgScore: 70.8, 
-                    grades: {
-                        "1ère année": { students: 90, attempts: 450 },
-                        "2ème année": { students: 85, attempts: 430 },
-                        "3ème année": { students: 80, attempts: 410 },
-                        "4ème année": { students: 75, attempts: 380 },
-                        "5ème année": { students: 70, attempts: 350 },
-                        "6ème année": { students: 80, attempts: 430 }
-                    }
-                },
-                history: { 
-                    students: 380, 
-                    attempts: 1580, 
-                    avgScore: 68.5, 
-                    grades: {
-                        "1ère année": { students: 70, attempts: 280 },
-                        "2ème année": { students: 65, attempts: 260 },
-                        "3ème année": { students: 60, attempts: 250 },
-                        "4ème année": { students: 55, attempts: 230 },
-                        "5ème année": { students: 65, attempts: 280 },
-                        "6ème année": { students: 65, attempts: 280 }
-                    }
-                },
-                geography: { 
-                    students: 320, 
-                    attempts: 1320, 
-                    avgScore: 73.2, 
-                    grades: {
-                        "1ère année": { students: 55, attempts: 220 },
-                        "2ème année": { students: 50, attempts: 200 },
-                        "3ème année": { students: 50, attempts: 210 },
-                        "4ème année": { students: 55, attempts: 230 },
-                        "5ème année": { students: 55, attempts: 240 },
-                        "6ème année": { students: 55, attempts: 220 }
-                    }
-                },
-                literature: { 
-                    students: 290, 
-                    attempts: 1142, 
-                    avgScore: 75.6, 
-                    grades: {
-                        "1ère année": { students: 50, attempts: 190 },
-                        "2ème année": { students: 45, attempts: 180 },
-                        "3ème année": { students: 45, attempts: 185 },
-                        "4ème année": { students: 50, attempts: 200 },
-                        "5ème année": { students: 50, attempts: 210 },
-                        "6ème année": { students: 50, attempts: 177 }
-                    }
-                }
-            },
-            weeklyTrend: {
-                labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
-                data: [1950, 2120, 2340, 2280]
-            },
-            monthlyTrend: {
-                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
-                data: [7850, 8120, 8450, 8740, 9020, 9250]
-            }
-        };
+        // Variables globales pour stocker les données
+        let gradeStatsData = {};
+        let overviewData = {};
 
         // Initialisation du dashboard
         document.addEventListener('DOMContentLoaded', function() {
-            initDashboard();
+            loadDashboardData();
             setupEventListeners();
         });
 
-        // Initialisation du dashboard
-        function initDashboard() {
+        // Charger les données du dashboard (par défaut sans filtre)
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/stats/all?period=7'); // période par défaut = 7j
+                const data = await response.json();
+
+                overviewData = data.overview;
+                gradeStatsData = data; // garde toute la réponse (overview + grade_stats)
+
+                updateDashboard();
+            } catch (error) {
+                console.error('Erreur lors du chargement des données:', error);
+            }
+        }
+
+        // Configuration des écouteurs d'événements
+        function setupEventListeners() {
+            document.querySelectorAll('.filter-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    applyFilters();
+                });
+            });
+        }
+
+        // Appliquer les filtres
+        async function applyFilters() {
+            const gradeFilter = document.getElementById('grade-filter').value;
+            const subjectFilter = document.getElementById('subject-filter').value;
+            const timeFilter = document.getElementById('time-filter').value;
+
+            const query = new URLSearchParams({
+                grade: gradeFilter !== 'all' ? gradeFilter : '',
+                subject: subjectFilter !== 'all' ? subjectFilter : '',
+                period: timeFilter
+            });
+
+            try {
+                const response = await fetch(`/api/stats/all?${query}`);
+                const data = await response.json();
+
+                overviewData = data.overview;
+                gradeStatsData = data;
+
+                updateDashboard();
+            } catch (error) {
+                console.error('Erreur lors du filtrage des données:', error);
+            }
+        }
+
+        // Mise à jour du dashboard
+        function updateDashboard() {
             updateStats();
             renderGradeChart();
             renderSubjectChart();
             renderSubjectStats();
         }
 
-        // Configuration des écouteurs d'événements
-        function setupEventListeners() {
-            // Boutons de période
-            document.querySelectorAll('.period-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    updateCharts();
-                });
-            });
-
-            // Filtres
-            document.querySelectorAll('.filter-select').forEach(select => {
-                select.addEventListener('change', function() {
-                    updateDashboard();
-                });
-            });
-        }
-
         // Mise à jour des statistiques
         function updateStats() {
-            // Calcul des totaux
-            let totalStudents = 0;
-            let totalAttempts = 0;
-            let totalScore = 0;
-            let totalTime = 0;
-            let gradeCount = 0;
-
-            for (const grade in quizData.grades) {
-                totalStudents += quizData.grades[grade].students;
-                totalAttempts += quizData.grades[grade].attempts;
-                totalScore += quizData.grades[grade].avgScore;
-                totalTime += quizData.grades[grade].avgTime;
-                gradeCount++;
-            }
-
-            // Mise à jour des éléments DOM
-            document.getElementById('total-students').textContent = totalStudents.toLocaleString();
-            document.getElementById('quiz-attempts').textContent = totalAttempts.toLocaleString();
-            document.getElementById('avg-score').textContent = (totalScore / gradeCount).toFixed(1) + '%';
-            document.getElementById('avg-time').textContent = (totalTime / gradeCount).toFixed(1);
+            document.getElementById('total-students').textContent = overviewData.total_students.toLocaleString();
+            document.getElementById('quiz-attempts').textContent = overviewData.total_attempts.toLocaleString();
+            document.getElementById('avg-score').textContent = (overviewData.average_score * 100).toFixed(1) + '%';
+            document.getElementById('avg-time').textContent = overviewData.average_time.toFixed(1);
         }
 
-        // Rendu du graphique des années
+        let gradeChartInstance = null;
+        let subjectChartInstance = null;
+
         function renderGradeChart() {
             const ctx = document.getElementById('gradeChart').getContext('2d');
-            
+
+            // ✅ Détruire l'ancien chart si il existe
+            if (gradeChartInstance) {
+                gradeChartInstance.destroy();
+            }
+
             const gradeLabels = [];
             const studentData = [];
             const attemptData = [];
-            
-            for (const grade in quizData.grades) {
-                const gradeName = getGradeDisplayName(grade);
-                gradeLabels.push(gradeName);
-                studentData.push(quizData.grades[grade].students);
-                attemptData.push(quizData.grades[grade].attempts);
+
+            for (const grade in gradeStatsData.grade_stats) {
+                gradeLabels.push(grade);
+                let totalStudents = 0;
+                let totalAttempts = 0;
+
+                for (const subject in gradeStatsData.summary_by_grade[grade]) {
+                    totalStudents = gradeStatsData.summary_by_grade[grade].total_students; // même pour toutes les matières
+                    totalAttempts = gradeStatsData.summary_by_grade[grade].total_attempts;
+                }
+
+                studentData.push(totalStudents);
+                attemptData.push(totalAttempts);
             }
-            
-            new Chart(ctx, {
+
+            gradeChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: gradeLabels,
@@ -799,157 +795,183 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         }
 
-        // Rendu du graphique des sujets
         function renderSubjectChart() {
             const ctx = document.getElementById('subjectChart').getContext('2d');
-            
-            const subjectLabels = [];
-            const studentData = [];
+
+            if (subjectChartInstance) {
+                subjectChartInstance.destroy();
+            }
+
+            const subjectData = {};
+
+            for (const grade in gradeStatsData.grade_stats) {
+                for (const subject in gradeStatsData.grade_stats[grade]) {
+                    if (!subjectData[subject]) {
+                        subjectData[subject] = 0;
+                    }
+                    subjectData[subject] += gradeStatsData.grade_stats[grade][subject].count;
+                }
+            }
+
+            const subjectLabels = Object.keys(subjectData);
+            const studentData = Object.values(subjectData);
+
             const colors = [
                 'rgba(255, 158, 64, 0.7)',
                 'rgba(71, 215, 100, 0.7)',
                 'rgba(155, 93, 229, 0.7)',
                 'rgba(78, 205, 196, 0.7)',
-                'rgba(241, 91, 181, 0.7)'
+                'rgba(241, 91, 181, 0.7)',
+                'rgba(86, 159, 242, 0.7)'
             ];
-            
-            for (const subject in quizData.subjects) {
-                subjectLabels.push(subject.charAt(0).toUpperCase() + subject.slice(1));
-                studentData.push(quizData.subjects[subject].students);
-            }
-            
-            new Chart(ctx, {
+
+            subjectChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: subjectLabels,
-                    datasets: [{
-                        data: studentData,
-                        backgroundColor: colors,
-                        borderWidth: 1
-                    }]
+                    datasets: [{ data: studentData, backgroundColor: colors, borderWidth: 1 }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right'
-                        }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
             });
         }
 
-        // Rendu des statistiques par sujet
+        // Rendu des statistiques par matière avec affichage des chapitres
         function renderSubjectStats() {
-            const container = document.getElementById('subjectStatsContainer');
-            container.innerHTML = '';
+    const container = document.getElementById('subjectStatsContainer');
+    container.innerHTML = '';
+
+    const gradeStats = gradeStatsData.grade_stats;
+
+    for (const grade in gradeStats) {
             
-            // Trier les sujets par nombre d'étudiants (ordre décroissant)
-            const sortedSubjects = Object.entries(quizData.subjects)
-                .sort((a, b) => b[1].students - a[1].students);
-            
-            // Créer une carte pour chaque matière
-            for (const [subjectName, data] of sortedSubjects) {
-                const subjectCard = document.createElement('div');
-                subjectCard.className = 'subject-card';
-                
-                // En-tête de la carte
-                const subjectHeader = document.createElement('div');
-                subjectHeader.className = 'subject-header';
-                
-                const subjectNameEl = document.createElement('div');
-                subjectNameEl.className = 'subject-name';
-                subjectNameEl.textContent = subjectName.charAt(0).toUpperCase() + subjectName.slice(1);
-                
-                const subjectStudents = document.createElement('div');
-                subjectStudents.className = 'subject-stat-value';
-                subjectStudents.textContent = `${data.students} élèves`;
-                
-                subjectHeader.appendChild(subjectNameEl);
-                subjectHeader.appendChild(subjectStudents);
-                subjectCard.appendChild(subjectHeader);
-                
-                // Grille des stats principales
-                const statsGrid = document.createElement('div');
-                statsGrid.className = 'subject-stats-grid';
-                
-                // Nombre d'élèves
-                const studentsStat = createSubjectStat(
-                    data.students.toLocaleString(), 
-                    'Élèves'
-                );
-                statsGrid.appendChild(studentsStat);
-                
-                // Tentatives
-                const attemptsStat = createSubjectStat(
-                    data.attempts.toLocaleString(), 
-                    'Tentatives'
-                );
-                statsGrid.appendChild(attemptsStat);
-                
-                subjectCard.appendChild(statsGrid);
-                
-                // Liste des années (remplace les chapitres)
-                const gradesList = document.createElement('div');
-                gradesList.className = 'grades-list';
-                
-                for (const [gradeName, gradeData] of Object.entries(data.grades)) {
-                    const gradeItem = document.createElement('div');
-                    gradeItem.className = 'grade-item';
-                    
-                    const gradeNameEl = document.createElement('div');
-                    gradeNameEl.className = 'grade-name';
-                    gradeNameEl.textContent = gradeName;
-                    
-                    const gradeStatsEl = document.createElement('div');
-                    gradeStatsEl.className = 'grade-stats';
-                    
-                    // Élèves par année
-                    const gradeStudents = document.createElement('div');
-                    gradeStudents.className = 'grade-stat';
-                    const studentsValue = document.createElement('div');
-                    studentsValue.className = 'grade-stat-value';
-                    studentsValue.textContent = gradeData.students;
-                    const studentsLabel = document.createElement('div');
-                    studentsLabel.className = 'grade-stat-label';
-                    studentsLabel.textContent = 'Élèves';
-                    gradeStudents.appendChild(studentsValue);
-                    gradeStudents.appendChild(studentsLabel);
-                    
-                    // Tentatives par année
-                    const gradeAttempts = document.createElement('div');
-                    gradeAttempts.className = 'grade-stat';
-                    const attemptsValue = document.createElement('div');
-                    attemptsValue.className = 'grade-stat-value';
-                    attemptsValue.textContent = gradeData.attempts;
-                    const attemptsLabel = document.createElement('div');
-                    attemptsLabel.className = 'grade-stat-label';
-                    attemptsLabel.textContent = 'Tentatives';
-                    gradeAttempts.appendChild(attemptsValue);
-                    gradeAttempts.appendChild(attemptsLabel);
-                    
-                    gradeStatsEl.appendChild(gradeStudents);
-                    gradeStatsEl.appendChild(gradeAttempts);
-                    
-                    gradeItem.appendChild(gradeNameEl);
-                    gradeItem.appendChild(gradeStatsEl);
-                    gradesList.appendChild(gradeItem);
-                }
-                
-                subjectCard.appendChild(gradesList);
-                container.appendChild(subjectCard);
-            }
+            for (const subject in gradeStats[grade]) {
+            const subjectData = gradeStats[grade][subject];
+
+            // 📌 Créer la carte matière
+            const subjectCard = document.createElement('div');
+            subjectCard.className = 'subject-card';
+
+            const subjectHeader = document.createElement('div');
+            subjectHeader.className = 'subject-header';
+            subjectHeader.textContent = `${subject} - ${grade}`;
+            subjectCard.appendChild(subjectHeader);
+
+            // 📌 Stats globales matière
+            const statsGrid = document.createElement('div');
+            statsGrid.className = 'subject-stats-grid';
+
+            const avgScoreStat = createSubjectStat(
+                `${(subjectData.average_score * 100).toFixed(1)}%`,
+                window.i18n.t('dashboard.subjects.average_score')
+            );
+            statsGrid.appendChild(avgScoreStat);
+
+            const completedStat = createSubjectStat(
+                `${subjectData.completed}/${subjectData.count}`,
+                window.i18n.t('dashboard.subjects.completed')
+            );
+            statsGrid.appendChild(completedStat);
+
+            subjectCard.appendChild(statsGrid);
+
+            // 📌 Liste chapitres
+            const chaptersList = document.createElement('div');
+            chaptersList.className = 'chapters-list';
+
+           for (const chapterName in subjectData.chapters) {
+    const chapterData = subjectData.chapters[chapterName];
+
+    // 🔹 Ligne complète chapitre + stats
+    const chapterItem = document.createElement('div');
+    chapterItem.className = 'chapter-item';
+    chapterItem.style.display = 'flex';
+    chapterItem.style.justifyContent = 'space-between';
+    chapterItem.style.alignItems = 'center';
+    chapterItem.style.padding = '0.5rem 0';
+
+    // Nom du chapitre
+    const chapterTitle = document.createElement('div');
+    chapterTitle.className = 'chapter-name';
+    chapterTitle.textContent = chapterName;
+    chapterItem.appendChild(chapterTitle);
+
+    // Stats (score, complétés, tentatives)
+    const chapterStats = document.createElement('div');
+    chapterStats.className = 'chapter-stats';
+    chapterStats.style.display = 'flex';
+    chapterStats.style.gap = '1.5rem';
+
+    // ✅ Score moyen du chapitre
+    const chapterScore = document.createElement('div');
+    chapterScore.className = 'chapter-stat';
+
+    const scoreValue = document.createElement('div');
+    scoreValue.className = 'chapter-stat-value';
+    scoreValue.style.color = getScoreColor(chapterData.average_score);
+    scoreValue.textContent = `${((chapterData.average_score || 0) * 100).toFixed(1)}%`;
+
+    const scoreLabel = document.createElement('div');
+    scoreLabel.className = 'chapter-stat-label';
+    scoreLabel.textContent = window.i18n.t('dashboard.subjects.score');
+
+    chapterScore.appendChild(scoreValue);
+    chapterScore.appendChild(scoreLabel);
+    chapterStats.appendChild(chapterScore);
+
+    // ✅ Complétés
+    const chapterCompleted = document.createElement('div');
+    chapterCompleted.className = 'chapter-stat';
+
+    const completedValue = document.createElement('div');
+    completedValue.className = 'chapter-stat-value';
+    completedValue.textContent = chapterData.completed || 0;
+
+    const completedLabel = document.createElement('div');
+    completedLabel.className = 'chapter-stat-label';
+    completedLabel.textContent = window.i18n.t('dashboard.subjects.completed');
+
+    chapterCompleted.appendChild(completedValue);
+    chapterCompleted.appendChild(completedLabel);
+    chapterStats.appendChild(chapterCompleted);
+
+    // ✅ Tentatives
+    const chapterAttempts = document.createElement('div');
+    chapterAttempts.className = 'chapter-stat';
+
+    const attemptsValue = document.createElement('div');
+    attemptsValue.className = 'chapter-stat-value';
+    attemptsValue.textContent = chapterData.count || 0;
+
+    const attemptsLabel = document.createElement('div');
+    attemptsLabel.className = 'chapter-stat-label';
+    attemptsLabel.textContent = window.i18n.t('dashboard.subjects.attempts');
+
+    chapterAttempts.appendChild(attemptsValue);
+    chapterAttempts.appendChild(attemptsLabel);
+    chapterStats.appendChild(chapterAttempts);
+
+    // Ajout des stats à la ligne
+    chapterItem.appendChild(chapterStats);
+    chaptersList.appendChild(chapterItem);
+}
+            subjectCard.appendChild(chaptersList);
+            container.appendChild(subjectCard);
         }
+    }
+
+    // 📌 Si aucune donnée
+    if (Object.keys(gradeStats).length === 0) {
+        const noData = document.createElement('div');
+        noData.className = 'no-data';
+        noData.textContent = window.i18n.t('dashboard.subjects.no_data');
+        container.appendChild(noData);
+    }
+}
 
         // Fonction utilitaire pour créer une statistique de matière
         function createSubjectStat(value, label) {
@@ -969,31 +991,11 @@
             return stat;
         }
 
-        // Fonction pour obtenir le nom d'affichage de l'année
-        function getGradeDisplayName(gradeKey) {
-            const gradeMap = {
-                "1ere": "1ère année",
-                "2eme": "2ème année",
-                "3eme": "3ème année",
-                "4eme": "4ème année",
-                "5eme": "5ème année",
-                "6eme": "6ème année"
-            };
-            return gradeMap[gradeKey] || gradeKey;
-        }
-
-        // Mise à jour des graphiques en fonction de la période sélectionnée
-        function updateCharts() {
-            // Cette fonction serait utilisée pour mettre à jour les graphiques
-            // en fonction de la période sélectionnée (hebdomadaire/mensuelle)
-            console.log("Mise à jour des graphiques pour la période sélectionnée");
-        }
-
-        // Mise à jour globale du dashboard
-        function updateDashboard() {
-            // Cette fonction serait utilisée pour mettre à jour tout le dashboard
-            // en fonction des filtres sélectionnés
-            console.log("Mise à jour du dashboard avec les filtres sélectionnés");
+        // Fonction pour obtenir la couleur en fonction du score
+        function getScoreColor(score) {
+            if (score >= 0.8) return '#2ecc71'; // Vert pour les scores élevés
+            if (score >= 0.5) return '#f39c12'; // Orange pour les scores moyens
+            return '#e74c3c'; // Rouge pour les scores bas
         }
     </script>
 </body>

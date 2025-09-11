@@ -5,6 +5,7 @@ from models.attempt import AttemptData
 from models.quiz import Quiz
 from bson import ObjectId
 from dateutil import parser
+import calendar
 
 
 class PerformanceController:
@@ -42,16 +43,27 @@ class PerformanceController:
                     "from": from_date.isoformat(),
                     "to": to_date.isoformat(),
                     "period": period,
-                    "achievements": [],
+                    "metrics": {
+                        "engagement": (0, 7),
+                        "time_spent": 0,
+                        "streak": 0,
+                        "completion_rate": (0, 0),
+                        "abandon_rate": (0, 0),
+                        "mastery": {},
+                        "perseverance": {"retries": 0, "improved": 0},
+                        "subject_balance": 0,
+                        "recommendation": None
+                    },
+                    "achievements": ["NO_ACTIVITY"],
                     "alerts": [],
-                    "recommendations": ["DEFAULT_NO_ACTIVITY"]
+                    "recommendations": ["START_SMALL"]
                 }), 200
 
             kid_attempts = [a.to_mongo().to_dict() for a in attempts]
             
-            # OPTIMISATION: Extraire les quizIDs uniques
+            # Extraire les quizIDs uniques
             quiz_ids = list(set(str(attempt.get("quizID")) for attempt in kid_attempts if attempt.get("quizID")))
-            
+
             if not quiz_ids:
                 return jsonify({
                     "userID": userId,
@@ -59,15 +71,24 @@ class PerformanceController:
                     "from": from_date.isoformat(),
                     "to": to_date.isoformat(),
                     "period": period,
-                    "achievements": ["DEFAULT_ACHIEVEMENT"],
-                    "alerts": ["DEFAULT_ALERT"],
-                    "recommendations": ["DEFAULT_RECOMMENDATION"]
+                    "metrics": {
+                        "engagement": (0, 7),
+                        "time_spent": 0,
+                        "streak": 0,
+                        "completion_rate": (0, 0),
+                        "abandon_rate": (0, 0),
+                        "mastery": {},
+                        "perseverance": {"retries": 0, "improved": 0},
+                        "subject_balance": 0,
+                        "recommendation": None
+                    },
+                    "achievements": ["FIRST_STEPS"],
+                    "alerts": ["NO_COMPLETED"],
+                    "recommendations": ["COMPLETE_ACTIVITY"]
                 }), 200
             
-            # Appeler l'API une seule fois avec tous les IDs
-            quizzes = Quiz.objects(id__in=quiz_ids).only('subject', 'chapter', 'grade')
-            quizzes_dict = {str(q.id): {"subject": q.subject, "chapter": q.chapter, "grade": q.grade} 
-                          for q in quizzes}
+            # Récupérer les métadonnées via l'API externe
+            quizzes_dict = get_quizzes_metadata(quiz_ids)
             
             kid_subject_stats = subject_stats(kid_attempts, quizzes_dict)
 
@@ -84,40 +105,44 @@ class PerformanceController:
                 "recommendation": recommend_subject(kid_subject_stats)
             }
 
-            # === Génération des codes ===
+            # === Génération des codes de messages ===
             achievements, alerts, recommendations = [], [], []
             days, total_days = metrics["engagement"]
             engagement_rate = days / total_days if total_days > 0 else 0
 
+            # Engagement
             if engagement_rate >= 0.8:
-                achievements.append("ENGAGEMENT_HIGH")
+                achievements.append(f"ENGAGEMENT_HIGH")
             elif engagement_rate >= 0.6:
-                achievements.append("ENGAGEMENT_GOOD")
+                achievements.append(f"ENGAGEMENT_GOOD")
             elif engagement_rate >= 0.4:
-                achievements.append("ENGAGEMENT_AVERAGE")
-            elif engagement_rate >= 0:
-                alerts.append("ENGAGEMENT_LOW")
+                achievements.append(f"ENGAGEMENT_AVERAGE")
+            else:
+                alerts.append(f"ENGAGEMENT_LOW")
 
+            # Streak
             streak = metrics["streak"]
             if streak >= 7:
-                achievements.append("STREAK_7")
+                achievements.append(f"STREAK_7")
             elif streak >= 5:
-                achievements.append("STREAK_5")
+                achievements.append(f"STREAK_5")
             elif streak >= 3:
-                achievements.append("STREAK_3")
+                achievements.append(f"STREAK_3")
 
+            # Completion
             completed, started = metrics["completion_rate"]
             if started > 0:
                 rate = completed / started
                 if rate >= 0.9:
-                    achievements.append("COMPLETION_EXCELLENT")
+                    achievements.append(f"COMPLETION_EXCELLENT")
                 elif rate >= 0.7:
-                    achievements.append("COMPLETION_GOOD")
+                    achievements.append(f"COMPLETION_GOOD")
                 elif rate >= 0.5:
-                    achievements.append("COMPLETION_AVERAGE")
+                    achievements.append(f"COMPLETION_AVERAGE")
                 if rate < 0.5 and started > 3:
-                    alerts.append("COMPLETION_LOW_ALERT")
+                    alerts.append(f"COMPLETION_LOW_ALERT")
 
+            # Mastery
             for subject, score in metrics["mastery"].items():
                 if score >= 0.9:
                     achievements.append(f"MASTERY_EXCELLENT_{subject}")
@@ -128,40 +153,47 @@ class PerformanceController:
                 elif score < 0.5:
                     alerts.append(f"MASTERY_LOW_ALERT_{subject}")
 
+            # Abandon
             abandoned = metrics["abandon_rate"][0]
             if abandoned > 0:
-                alerts.append("ABANDON_ALERT")
+                alerts.append(f"ABANDON_ALERT")
 
+            # Perseverance
             perseverance = metrics["perseverance"]
             if perseverance["improved"] >= 5:
-                achievements.append("PERSEVERANCE_STRONG")
+                achievements.append(f"PERSEVERANCE_STRONG")
             elif perseverance["improved"] >= 3:
-                achievements.append("PERSEVERANCE_GOOD")
+                achievements.append(f"PERSEVERANCE_GOOD")
             elif perseverance["retries"] > 0:
-                achievements.append("PERSEVERANCE_RETRIES")
+                achievements.append(f"PERSEVERANCE_RETRIES")
 
+            # Balance
             balance = metrics["subject_balance"]
             if balance < 40:
-                recommendations.append("BALANCE_LOW")
+                recommendations.append(f"BALANCE_LOW")
             elif balance >= 80:
-                achievements.append("BALANCE_GOOD")
+                achievements.append(f"BALANCE_GOOD")
 
+            # Recommendation matière
             if metrics["recommendation"] and metrics["recommendation"] != "Aucune":
                 recommendations.append(f"RECOMMEND_{metrics['recommendation']}")
 
+            # Temps passé
             total_minutes = metrics["time_spent"]
             if total_minutes >= 300:
-                achievements.append("TIME_HIGH")
+                achievements.append(f"TIME_HIGH")
             elif total_minutes >= 180:
-                achievements.append("TIME_MEDIUM")
+                achievements.append(f"TIME_MEDIUM")
             elif total_minutes > 0:
-                alerts.append("TIME_LOW")
+                alerts.append(f"TIME_LOW")
 
+            # Inspiration
             if period == "week":
                 achievements.append("INSPIRATION_WEEK")
             elif period == "month":
                 achievements.append("INSPIRATION_MONTH")
 
+            # Valeurs par défaut
             if not achievements:
                 achievements.append("DEFAULT_ACHIEVEMENT")
             if not alerts:
@@ -175,6 +207,7 @@ class PerformanceController:
                 "from": from_date.isoformat(),
                 "to": to_date.isoformat(),
                 "period": period,
+                "metrics": metrics,
                 "achievements": achievements,
                 "alerts": alerts,
                 "recommendations": recommendations
@@ -182,7 +215,7 @@ class PerformanceController:
 
         except Exception as e:
             return jsonify({"error": str(e)}), 500
-
+    
     @staticmethod
     def get_metrics(userId, kidIndex):
         """Retourne les métriques de performance détaillées"""
@@ -203,16 +236,16 @@ class PerformanceController:
             if not kid_attempts:
                 return jsonify({"message": "Aucune tentative trouvée"}), 200
             
-            # Extraire tous les quizID uniques
-            quiz_ids = list(set(str(attempt.get("quizID")) for attempt in kid_attempts if attempt.get("quizID")))
             
+            
+            # Extraire les quizIDs uniques
+            quiz_ids = list(set(str(attempt.get("quizID")) for attempt in kid_attempts if attempt.get("quizID")))
+
             if not quiz_ids:
                 return jsonify({"message": "Aucun quizID valide trouvé"}), 200
             
-            # Appeler l'API une seule fois avec tous les IDs
-            quizzes = Quiz.objects(id__in=quiz_ids).only('subject', 'chapter', 'grade')
-            quizzes_dict = {str(q.id): {"subject": q.subject, "chapter": q.chapter, "grade": q.grade} 
-                          for q in quizzes}
+            # Récupérer les métadonnées via l'API externe
+            quizzes_dict = get_quizzes_metadata(quiz_ids)
             
             kid_subject_stats = subject_stats(kid_attempts, quizzes_dict)
 
@@ -236,20 +269,24 @@ class PerformanceController:
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
-
     @staticmethod
-    def get_weekly_average_scores(userID, kidIndex):
-        """Retourne les scores moyens par jour de la semaine"""
+    def get_average_scores(userID, kidIndex):
+        """
+        Retourne les scores moyens par jour (week) ou par jour du mois (month)
+        period: 'week' ou 'month'
+        """
         try:
             from_str = request.args.get("from")
             to_str = request.args.get("to")
-            
+            period = request.args.get("period", "week")
+
             from_date = parse_date(from_str) if from_str else None
             to_date = parse_date(to_str) if to_str else None
-            
+
             if not from_date or not to_date:
                 return jsonify({"error": "Dates invalides"}), 400
 
+            # Récupérer les attempts
             attempts = AttemptData.objects(
                 userID=userID,
                 kidIndex=kidIndex,
@@ -257,26 +294,48 @@ class PerformanceController:
                 createdAt__lte=to_date
             )
 
-            # Initialisation
-            jours = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
-            scores = {j: [] for j in jours}
+            if period == 'week':
+                labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+                scores_dict = {j: [] for j in labels}
 
-            for att in attempts:
-                day_index = att.createdAt.weekday()  # 0=Lundi, 6=Dimanche
-                jour = jours[day_index]
-                scores[jour].append(att.score)
+                # Collecter les scores par jour
+                for att in attempts:
+                    day_index = att.createdAt.weekday()  # 0=Lundi, 6=Dimanche
+                    jour = labels[day_index]
+                    scores_dict[jour].append(att.score)
 
-            # Moyenne par jour
-            data = [round(sum(v) / len(v), 2) if v else 0 for v in scores.values()]
+                # Diviser par le max nombre d'essais pour normaliser
+                data = []
+                for jour in labels:
+                    max_attempts = max(len(v) for v in scores_dict.values()) if scores_dict else 1
+                    total_score = sum(scores_dict[jour])
+                    avg = round(total_score / max_attempts, 2) if total_score else 0
+                    data.append(avg)
+
+            elif period == 'month':
+                # Nombre de jours dans le mois de from_date
+                num_days = calendar.monthrange(from_date.year, from_date.month)[1]
+                labels = [str(d) for d in range(1, num_days + 1)]
+                scores_dict = {str(d): [] for d in range(1, num_days + 1)}
+
+                for att in attempts:
+                    day = str(att.createdAt.day)
+                    scores_dict[day].append(att.score)
+
+                max_attempts = max(len(v) for v in scores_dict.values()) if scores_dict else 1
+                data = [round(sum(scores_dict[day]) / max_attempts, 2) if scores_dict[day] else 0 for day in labels]
+
+            else:
+                return jsonify({"error": "Période invalide"}), 400
 
             return jsonify({
-                "labels": jours,
+                "labels": labels,
                 "data": data
             })
 
         except Exception as e:
             return jsonify({"error": str(e)}), 500
-
+        
     @staticmethod
     def get_grade_stats(userID, kidIndex):
         """Statistiques par niveau, matière et chapitre"""
@@ -636,3 +695,21 @@ def calculate_mastery(attempts, quizzes_dict):
     return mastery
 
 
+
+
+
+
+import requests
+
+def get_quizzes_metadata(quiz_ids):
+    url = "http://48.216.249.114:8080/api/getquizesmetadata"
+    payload = {"quizIds": quiz_ids}
+    
+    try:
+        response = requests.post(url, json=payload)
+        response.raise_for_status()  # Lève une erreur si statut != 200
+        quizzes_dict = response.json()  # Ton dictionnaire comme dans l'exemple
+        return quizzes_dict
+    except requests.exceptions.RequestException as e:
+        print("Erreur API:", e)
+        return {}  # Retourne un dict vide en cas d'erreur

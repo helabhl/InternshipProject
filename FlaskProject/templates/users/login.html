@@ -38,21 +38,7 @@
         <div class="card shadow-2-strong" style="border-radius: 1rem;">
           <div class="card-body p-5 text-center">
 
-            <h3 class="mb-5">Sign in</h3>
-
-            <!-- Affiche les messages flash -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                <div>
-                  {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                      {{ message }}
-                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                  {% endfor %}
-                </div>
-              {% endif %}
-            {% endwith %}
+            <h3 class="mb-5">Sign in</h3>            
           <form method="POST" action="{{ url_for('auth.login_sms') }}">
             <div data-mdb-input-init class="form-outline mb-4">
               <input

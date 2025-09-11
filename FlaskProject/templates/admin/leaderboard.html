@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Ferid Around The World</title>
+    <!-- Font Awesome local -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/all.min.css') }}">
+    <!-- Chart.js local -->
+    <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+    <!-- Localization System -->
+    <script src="{{ url_for('static', filename='js/localization.js') }}"></script>
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --primary-light: #8a36f5;
+            --secondary: #2575fc;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #3498db;
+            --light: #f8f9fa;
+            --dark: #2c3e50;
+            --gray: #7f8c8d;
+            --white: #ffffff;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            --card-hover: 0 15px 35px rgba(0, 0, 0, 0.2);
+            --border-radius: 16px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header styles */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 0.8rem 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1.5rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            transition: all 0.3s;
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        nav a:hover, nav a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main container */
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* View Toggle */
+        .view-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 0.5rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .view-btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--gray);
+            transition: var(--transition);
+            border-radius: 30px;
+        }
+
+        .view-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Dashboard Views */
+        .dashboard-view {
+            display: none;
+        }
+
+        .dashboard-view.active {
+            display: block;
+        }
+
+        /* ========== ADMIN DASHBOARD STYLES ========== */
+        /* Nouvelle structure de grille avec deux colonnes */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 1.5rem;
+            grid-template-areas:
+                "header header"
+                "filters filters"
+                "stats charts"
+                "subjects subjects";
+        }
+
+        .page-header {
+            grid-area: header;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .filters-container {
+            grid-area: filters;
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .stats-grid {
+            grid-area: stats;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 0;
+        }
+
+        .charts-container {
+            grid-area: charts;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 0;
+        }
+
+        .subject-stats {
+            grid-area: subjects;
+            margin-top: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Card styles */
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+        }
+
+        .stat-card:nth-child(1)::before { background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%); }
+        .stat-card:nth-child(2)::before { background: linear-gradient(90deg, var(--success) 0%, #91E5A6 100%); }
+        .stat-card:nth-child(3)::before { background: linear-gradient(90deg, var(--warning) 0%, #FFE194 100%); }
+        .stat-card:nth-child(4)::before { background: linear-gradient(90deg, var(--info) 0%, #92E4DF 100%); }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover);
+        }
+
+        .stat-card i {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0.6rem;
+            color: var(--dark);
+            font-weight: 800;
+        }
+
+        .stat-card p {
+            color: var(--gray);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Charts */
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+            height: 100%;
+        }
+
+        .chart-card:hover {
+            box-shadow: var(--card-hover);
+        }
+
+        .chart-title {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .chart-title i {
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+        }
+
+        /* Nouveau style pour les cartes de sujets en grille */
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .subject-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.2rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .subject-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--card-hover);
+        }
+
+        /* Style pour l'en-tête des statistiques de matières */
+        .subject-header-bold {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .subject-name-bold {
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .subject-grade-bold {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .subject-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .subject-stat {
+            text-align: center;
+            padding: 0.6rem;
+            background-color: rgba(74, 109, 167, 0.08);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .subject-stat:hover {
+            transform: scale(1.05);
+            background-color: rgba(74, 109, 167, 0.12);
+        }
+
+        .subject-stat-value {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
+        }
+
+        .subject-stat-label {
+            font-size: 0.75rem;
+            color: var(--gray);
+            font-weight: 600;
+        }
+
+        .chapters-list {
+            margin-top: 1rem;
+        }
+
+        .chapters-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .chapter-item {
+            padding: 0.8rem 0;
+            border-bottom: 1px dashed #f1f2f6;
+        }
+
+        .chapter-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .chapter-stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+        }
+
+        .chapter-stat {
+            text-align: center;
+            flex: 1;
+        }
+
+        .chapter-stat-value {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+
+        .chapter-stat-label {
+            font-size: 0.7rem;
+            color: var(--gray);
+            margin-top: 0.2rem;
+        }
+
+        .no-chapters, .no-data {
+            text-align: center;
+            color: var(--gray);
+            font-style: italic;
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* ========== LEADERBOARD STYLES ========== */
+        /* Filters */
+        .leaderboard-filters {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: white;
+            font-size: 1rem;
+            color: var(--dark);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+        }
+
+        /* Leaderboard */
+        .leaderboard {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 120px;
+            padding: 1.2rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .player-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 120px;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .player-row:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .player-row:last-child {
+            border-bottom: none;
+        }
+
+        .rank {
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f1f3f5;
+            color: var(--dark);
+        }
+
+        .top-1 .rank {
+            background: linear-gradient(135deg, #FFD700 0%, #DAA520 100%);
+            color: white;
+        }
+
+        .top-2 .rank {
+            background: linear-gradient(135deg, #C0C0C0 0%, #A9A9A9 100%);
+            color: white;
+        }
+
+        .top-3 .rank {
+            background: linear-gradient(135deg, #CD7F32 0%, #A56622 100%);
+            color: white;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+            border: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .player-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--dark);
+        }
+
+        .player-parent {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 3px;
+        }
+
+        .score {
+            font-weight: 600;
+            text-align: center;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .badges {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .badge {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: var(--success);
+            color: white;
+        }
+
+        /* Modal */
+        .dashboard-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .dashboard-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #6c757d;
+            transition: var(--transition);
+            background: none;
+            border: none;
+        }
+
+        .close-modal:hover {
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
+
+        .dashboard-header {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            padding-right: 2rem;
+        }
+
+        .dashboard-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-subtitle {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .dashboard-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 0.8rem 0;
+            direction: ltr;
+        }
+
+        .info-label {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        .dashboard-chart {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .dashboard-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.8rem;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.2);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(106, 17, 203, 0.3);
+        }
+
+        /* Loading spinner */
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        /* Show more button */
+        .show-more-container {
+            display: flex;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .show-more-btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.2);
+        }
+
+        .show-more-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(106, 17, 203, 0.3);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "filters"
+                    "stats"
+                    "charts"
+                    "subjects";
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .subject-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .leaderboard-header, .player-row {
+                grid-template-columns: 60px 1fr 100px 100px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .filter-group {
+                min-width: 100%;
+            }
+            
+            .leaderboard-header {
+                display: none;
+            }
+            
+            .player-row {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 1rem;
+                padding: 1.5rem;
+            }
+            
+            .rank {
+                margin: 0 auto;
+            }
+            
+            .player-info {
+                justify-content: center;
+            }
+            
+            .dashboard-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-actions {
+                flex-direction: column;
+            }
+            
+            .period-selector {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .period-buttons {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .subject-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+            
+            .dashboard-content {
+                padding: 1.5rem;
+            }
+            
+            .dashboard-title {
+                font-size: 1.5rem;
+            }
+            
+            .info-value {
+                font-size: 1.8rem;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+            
+            nav a {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+           <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h1 data-i18n="header.title">Ferid Around The World</h1>
+            </div>
+            
+            <nav>
+                <ul>
+                    <li><a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a></li>
+                    <li><a href="#"><i class="fas fa-user-graduate"></i> Élèves</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Rapports</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- View Toggle -->
+        <div class="view-toggle">
+            <button class="view-btn active" data-view="admin-dashboard">Tableau de bord Admin</button>
+            <button class="view-btn" data-view="leaderboard">Classement des Enfants</button>
+        </div>
+
+        <!-- Admin Dashboard View -->
+        <div id="admin-dashboard" class="dashboard-view active">
+            <div class="dashboard-container">
+                <!-- Filters -->
+                <div class="filters-container">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label class="filter-label">Année scolaire</label>
+                            <select class="filter-select" id="grade-filter">
+                                <option value="all">Toutes les années</option>
+                                <option value="السنة الأولى">1ère année</option>
+                                <option value="السنة الثانية">2ème année</option>
+                                <option value="السنة الثالثة">3ème année</option>
+                                <option value="السنة الرابعة">4ème année</option>
+                                <option value="السنة الخامسة">5ème année</option>
+                                <option value="السنة السادسة">6ème année</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Matière</label>
+                            <select class="filter-select" id="subject-filter">
+                                <option value="all">Toutes les matières</option>
+                                <option value="اللغة العربية">Arabe</option>
+                                <option value="اللغة الإنجليزية">Anglais</option>
+                                <option value="الرياضيات">Mathématiques</option>
+                                <option value="العلوم">Sciences</option>
+                                <option value="التاريخ">Histoire</option>
+                                <option value="الجغرافيا">Géographie</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Période</label>
+                            <select class="filter-select" id="time-filter">
+                                <option value="7">7 derniers jours</option>
+                                <option value="14">14 derniers jours</option>
+                                <option value="30">30 derniers jours</option>
+                                <option value="90">3 derniers mois</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <h3 id="total-students">0</h3>
+                        <p>Élèves actifs</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-check-circle"></i>
+                        <h3 id="quiz-attempts">0</h3>
+                        <p>Tentatives de quiz</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-chart-bar"></i>
+                        <h3 id="avg-score">0%</h3>
+                        <p>Score moyen</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-clock"></i>
+                        <h3 id="avg-time">0</h3>
+                        <p>Temps moyen (min)</p>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Engagement par année</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="gradeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Répartition par matière</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="subjectChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subject Stats - Nouvelle disposition en grille -->
+                <div class="subject-stats">
+                    <div class="chart-title">
+                        <i class="fas fa-book"></i>
+                        <span>Matières et répartition par année</span>
+                    </div>
+                    <div class="subject-grid" id="subjectStatsContainer">
+                        <!-- Les cartes des matières seront générées ici par JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard View -->
+        <div id="leaderboard" class="dashboard-view">
+            <!-- Filters -->
+            <div class="leaderboard-filters">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">Année scolaire</label>
+                        <select class="filter-select" id="leaderboard-grade-filter">
+                            <option value="all">Toutes les années</option>
+                            <option value="السنة الأولى">1ère année</option>
+                            <option value="السنة الثانية">2ème année</option>
+                            <option value="السنة الثالثة">3ème année</option>
+                            <option value="السنة الرابعة">4ème année</option>
+                            <option value="السنة الخامسة">5ème année</option>
+                            <option value="السنة السادسة">6ème année</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Matière</label>
+                        <select class="filter-select" id="leaderboard-subject-filter">
+                            <option value="all">Toutes les matières</option>
+                            <option value="اللغة العربية">Arabe</option>
+                            <option value="اللغة الإنجليزية">Anglais</option>
+                            <option value="الرياضيات">Mathématiques</option>
+                            <option value="العلوم">Sciences</option>
+                            <option value="التاريخ">Histoire</option>
+                            <option value="الجغرافيا">Géographie</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Période</label>
+                        <select class="filter-select" id="leaderboard-time-filter">
+                            <option value="7">7 derniers jours</option>
+                            <option value="14">14 derniers jours</option>
+                            <option value="30">30 derniers jours</option>
+                            <option value="90">3 derniers mois</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div class="leaderboard">
+                <div class="leaderboard-header">
+                    <div>Rang</div>
+                    <div>Enfant</div>
+                    <div>Score</div>
+                    <div>Quiz</div>
+                </div>
+
+                <div class="leaderboard-content" id="leaderboard-content">
+                    <div class="loader">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+                
+                <!-- Show more button container -->
+                <div class="show-more-container" id="show-more-container" style="display: none;">
+                    <button class="show-more-btn" id="show-more-btn">Afficher plus d'enfants</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Modal -->
+    <div class="dashboard-modal" id="dashboard-modal">
+        <div class="dashboard-content">
+            <button class="close-modal" id="close-modal">&times;</button>
+            <div class="dashboard-header">
+                <h2 class="dashboard-title" id="dashboard-name">Nom de l'Enfant</h2>
+                <p class="dashboard-subtitle" id="dashboard-parent">Parent: ID: Chargement...</p>
+            </div>
+            
+            <div class="dashboard-info">
+                <div class="info-card">
+                    <div class="info-label">Score Total</div>
+                    <div class="info-value" id="info-score">0</div>
+                    <div class="info-label">points</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-label">Rang</div>
+                    <div class="info-value" id="info-rank">0</div>
+                    <div class="info-label">sur <span id="total-students">0</span> enfants</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-label">Quiz</div>
+                    <div class="info-value" id="info-quizzes">0</div>
+                    <div class="info-label">complétés</div>
+                </div>
+            </div>            
+            
+            <div class="dashboard-actions">
+                <button class="action-btn" id="view-full-dashboard">Voir le dashboard complet</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== VIEW TOGGLE FUNCTIONALITY ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // View toggle functionality
+            const viewButtons = document.querySelectorAll('.view-btn');
+            const views = document.querySelectorAll('.dashboard-view');
+            
+            viewButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const viewId = this.getAttribute('data-view');
+                    
+                    // Update active button
+                    viewButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show selected view
+                    views.forEach(view => view.classList.remove('active'));
+                    document.getElementById(viewId).classList.add('active');
+                });
+            });
+            
+            // Initialize both dashboards
+            initializeAdminDashboard();
+            initializeLeaderboard();
+        });
+
+        // ========== ADMIN DASHBOARD FUNCTIONALITY ==========
+        // Variables globales pour stocker les données
+        let gradeStatsData = {};
+        let overviewData = {};
+
+        // Initialisation du dashboard admin
+        function initializeAdminDashboard() {
+            loadDashboardData();
+            setupEventListeners();
+        }
+
+        // Charger les données du dashboard (par défaut sans filtre)
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/stats/all?period=7'); // période par défaut = 7j
+                const data = await response.json();
+
+                overviewData = data.overview;
+                gradeStatsData = data; // garde toute la réponse (overview + grade_stats)
+
+                updateDashboard();
+            } catch (error) {
+                console.error('Erreur lors du chargement des données:', error);
+            }
+        }
+
+        // Configuration des écouteurs d'événements
+        function setupEventListeners() {
+            document.querySelectorAll('.filter-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    applyFilters();
+                });
+            });
+        }
+
+        // Appliquer les filtres
+        async function applyFilters() {
+            const gradeFilter = document.getElementById('grade-filter').value;
+            const subjectFilter = document.getElementById('subject-filter').value;
+            const timeFilter = document.getElementById('time-filter').value;
+
+            const query = new URLSearchParams({
+                grade: gradeFilter !== 'all' ? gradeFilter : '',
+                subject: subjectFilter !== 'all' ? subjectFilter : '',
+                period: timeFilter
+            });
+
+            try {
+                const response = await fetch(`/api/stats/all?${query}`);
+                const data = await response.json();
+
+                overviewData = data.overview;
+                gradeStatsData = data;
+
+                updateDashboard();
+            } catch (error) {
+                console.error('Erreur lors du filtrage des données:', error);
+            }
+        }
+
+        // Mise à jour du dashboard
+        function updateDashboard() {
+            updateStats();
+            renderGradeChart();
+            renderSubjectChart();
+            renderSubjectStats();
+        }
+
+        // Mise à jour des statistiques
+        function updateStats() {
+            document.getElementById('total-students').textContent = overviewData.total_students.toLocaleString();
+            document.getElementById('quiz-attempts').textContent = overviewData.total_attempts.toLocaleString();
+            document.getElementById('avg-score').textContent = (overviewData.average_score * 100).toFixed(1) + '%';
+            document.getElementById('avg-time').textContent = overviewData.average_time.toFixed(1);
+        }
+
+        let gradeChartInstance = null;
+        let subjectChartInstance = null;
+
+        function renderGradeChart() {
+            const ctx = document.getElementById('gradeChart').getContext('2d');
+
+            // ✅ Détruire l'ancien chart si il existe
+            if (gradeChartInstance) {
+                gradeChartInstance.destroy();
+            }
+
+            const gradeLabels = [];
+            const studentData = [];
+            const attemptData = [];
+
+            for (const grade in gradeStatsData.grade_stats) {
+                gradeLabels.push(grade);
+                let totalStudents = 0;
+                let totalAttempts = 0;
+
+                for (const subject in gradeStatsData.summary_by_grade[grade]) {
+                    totalStudents = gradeStatsData.summary_by_grade[grade].total_students; // même pour toutes les matières
+                    totalAttempts = gradeStatsData.summary_by_grade[grade].total_attempts;
+                }
+
+                studentData.push(totalStudents);
+                attemptData.push(totalAttempts);
+            }
+
+            gradeChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: gradeLabels,
+                    datasets: [
+                        {
+                            label: 'Élèves',
+                            data: studentData,
+                            backgroundColor: 'rgba(106, 17, 203, 0.7)',
+                            borderColor: 'rgba(106, 17, 203, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Tentatives',
+                            data: attemptData,
+                            backgroundColor: 'rgba(37, 117, 252, 0.7)',
+                            borderColor: 'rgba(37, 117, 252, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function renderSubjectChart() {
+            const ctx = document.getElementById('subjectChart').getContext('2d');
+
+            if (subjectChartInstance) {
+                subjectChartInstance.destroy();
+            }
+
+            const subjectData = {};
+
+            for (const grade in gradeStatsData.grade_stats) {
+                for (const subject in gradeStatsData.grade_stats[grade]) {
+                    if (!subjectData[subject]) {
+                        subjectData[subject] = 0;
+                    }
+                    subjectData[subject] += gradeStatsData.grade_stats[grade][subject].count;
+                }
+            }
+
+            const subjectLabels = Object.keys(subjectData);
+            const studentData = Object.values(subjectData);
+
+            const colors = [
+                'rgba(255, 158, 64, 0.7)',
+                'rgba(71, 215, 100, 0.7)',
+                'rgba(155, 93, 229, 0.7)',
+                'rgba(78, 205, 196, 0.7)',
+                'rgba(241, 91, 181, 0.7)',
+                'rgba(86, 159, 242, 0.7)'
+            ];
+
+            subjectChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: subjectLabels,
+                    datasets: [{ data: studentData, backgroundColor: colors, borderWidth: 1 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+            });
+        }
+
+        // Rendu des statistiques par matière avec affichage des chapitres
+        function renderSubjectStats() {
+            const container = document.getElementById('subjectStatsContainer');
+            container.innerHTML = '';
+
+            const gradeStats = gradeStatsData.grade_stats;
+
+            for (const grade in gradeStats) {
+                for (const subject in gradeStats[grade]) {
+                    const subjectData = gradeStats[grade][subject];
+
+                    // 📌 Créer la carte matière
+                    const subjectCard = document.createElement('div');
+                    subjectCard.className = 'subject-card';
+
+                    // En-tête avec nom de matière et année en gras
+                    const subjectHeader = document.createElement('div');
+                    subjectHeader.className = 'subject-header-bold';
+                    
+                    const subjectName = document.createElement('div');
+                    subjectName.className = 'subject-name-bold';
+                    subjectName.textContent = subject;
+                    
+                    const subjectGrade = document.createElement('div');
+                    subjectGrade.className = 'subject-grade-bold';
+                    subjectGrade.textContent = grade;
+                    
+                    subjectHeader.appendChild(subjectName);
+                    subjectHeader.appendChild(subjectGrade);
+                    subjectCard.appendChild(subjectHeader);
+
+                    // 📌 Stats globales matière
+                    const statsGrid = document.createElement('div');
+                    statsGrid.className = 'subject-stats-grid';
+
+                    const avgScoreStat = createSubjectStat(
+                        `${(subjectData.average_score * 100).toFixed(1)}%`,
+                        'Score moyen'
+                    );
+                    statsGrid.appendChild(avgScoreStat);
+
+                    const completedStat = createSubjectStat(
+                        `${subjectData.completed}/${subjectData.count}`,
+                        'Complétés'
+                    );
+                    statsGrid.appendChild(completedStat);
+
+                    subjectCard.appendChild(statsGrid);
+
+                    // 📌 Liste chapitres
+                    const chaptersList = document.createElement('div');
+                    chaptersList.className = 'chapters-list';
+
+                    for (const chapterName in subjectData.chapters) {
+                        const chapterData = subjectData.chapters[chapterName];
+
+                        // 🔹 Ligne complète chapitre + stats
+                        const chapterItem = document.createElement('div');
+                        chapterItem.className = 'chapter-item';
+                        chapterItem.style.display = 'flex';
+                        chapterItem.style.justifyContent = 'space-between';
+                        chapterItem.style.alignItems = 'center';
+                        chapterItem.style.padding = '0.5rem 0';
+
+                        // Nom du chapitre
+                        const chapterTitle = document.createElement('div');
+                        chapterTitle.className = 'chapter-name';
+                        chapterTitle.textContent = chapterName;
+                        chapterItem.appendChild(chapterTitle);
+
+                        // Stats (score, complétés, tentatives)
+                        const chapterStats = document.createElement('div');
+                        chapterStats.className = 'chapter-stats';
+                        chapterStats.style.display = 'flex';
+                        chapterStats.style.gap = '1.5rem';
+
+                        // ✅ Score moyen du chapitre
+                        const chapterScore = document.createElement('div');
+                        chapterScore.className = 'chapter-stat';
+
+                        const scoreValue = document.createElement('div');
+                        scoreValue.className = 'chapter-stat-value';
+                        scoreValue.style.color = getScoreColor(chapterData.average_score);
+                        scoreValue.textContent = `${((chapterData.average_score || 0) * 100).toFixed(1)}%`;
+
+                        const scoreLabel = document.createElement('div');
+                        scoreLabel.className = 'chapter-stat-label';
+                        scoreLabel.textContent = 'Score';
+
+                        chapterScore.appendChild(scoreValue);
+                        chapterScore.appendChild(scoreLabel);
+                        chapterStats.appendChild(chapterScore);
+
+                        // ✅ Complétés
+                        const chapterCompleted = document.createElement('div');
+                        chapterCompleted.className = 'chapter-stat';
+
+                        const completedValue = document.createElement('div');
+                        completedValue.className = 'chapter-stat-value';
+                        completedValue.textContent = chapterData.completed || 0;
+
+                        const completedLabel = document.createElement('div');
+                        completedLabel.className = 'chapter-stat-label';
+                        completedLabel.textContent = 'Complétés';
+
+                        chapterCompleted.appendChild(completedValue);
+                        chapterCompleted.appendChild(completedLabel);
+                        chapterStats.appendChild(chapterCompleted);
+
+                        // ✅ Tentatives
+                        const chapterAttempts = document.createElement('div');
+                        chapterAttempts.className = 'chapter-stat';
+
+                        const attemptsValue = document.createElement('div');
+                        attemptsValue.className = 'chapter-stat-value';
+                        attemptsValue.textContent = chapterData.count || 0;
+
+                        const attemptsLabel = document.createElement('div');
+                        attemptsLabel.className = 'chapter-stat-label';
+                        attemptsLabel.textContent = 'Tentatives';
+
+                        chapterAttempts.appendChild(attemptsValue);
+                        chapterAttempts.appendChild(attemptsLabel);
+                        chapterStats.appendChild(chapterAttempts);
+
+                        // Ajout des stats à la ligne
+                        chapterItem.appendChild(chapterStats);
+                        chaptersList.appendChild(chapterItem);
+                    }
+                    subjectCard.appendChild(chaptersList);
+                    container.appendChild(subjectCard);
+                }
+            }
+
+            // 📌 Si aucune donnée
+            if (Object.keys(gradeStats).length === 0) {
+                const noData = document.createElement('div');
+                noData.className = 'no-data';
+                noData.textContent = 'Aucune donnée disponible';
+                container.appendChild(noData);
+            }
+        }
+
+        // Fonction utilitaire pour créer une statistique de matière
+        function createSubjectStat(value, label) {
+            const stat = document.createElement('div');
+            stat.className = 'subject-stat';
+            
+            const valueEl = document.createElement('div');
+            valueEl.className = 'subject-stat-value';
+            valueEl.textContent = value;
+            
+            const labelEl = document.createElement('div');
+            labelEl.className = 'subject-stat-label';
+            labelEl.textContent = label;
+            
+            stat.appendChild(valueEl);
+            stat.appendChild(labelEl);
+            return stat;
+        }
+
+        // Fonction pour obtenir la couleur en fonction du score
+        function getScoreColor(score) {
+            if (score >= 0.8) return '#2ecc71'; // Vert pour les scores élevés
+            if (score >= 0.5) return '#f39c12'; // Orange pour les scores moyens
+            return '#e74c3c'; // Rouge pour les scores bas
+        }
+
+        // ========== LEADERBOARD FUNCTIONALITY ==========
+        // Variables globales
+        let childrenData = [];
+        let filteredChildren = [];
+        let displayedChildrenCount = 10; // Nombre d'enfants à afficher par défaut
+
+        // Initialisation du leaderboard
+        function initializeLeaderboard() {
+            // Configurer les écouteurs d'événements pour les filtres
+            document.getElementById('leaderboard-grade-filter').addEventListener('change', applyLeaderboardFilters);
+            document.getElementById('leaderboard-subject-filter').addEventListener('change', applyLeaderboardFilters);
+            document.getElementById('leaderboard-time-filter').addEventListener('change', applyLeaderboardFilters);
+            
+            // Configurer le bouton "Afficher plus"
+            document.getElementById('show-more-btn').addEventListener('click', showMoreChildren);
+            
+            // Fermer le modal
+            document.getElementById('close-modal').addEventListener('click', () => {
+                document.getElementById('dashboard-modal').style.display = 'none';
+            });
+            
+            // Fermer le modal en cliquant à l'extérieur
+            window.addEventListener('click', (event) => {
+                if (event.target === document.getElementById('dashboard-modal')) {
+                    document.getElementById('dashboard-modal').style.display = 'none';
+                }
+            });
+            
+            // Charger les données du leaderboard
+            loadLeaderboardData();
+        }
+
+        // Fonction pour récupérer les données des enfants depuis l'API
+        async function fetchChildrenData() {
+            try {
+                const response = await fetch('http://localhost:5000/api/stats/kids');
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des données');
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Erreur:', error);
+                // Retourner des données de démonstration en cas d'erreur
+                return [
+                    {
+                        userID: "USER001",
+                        kidIndex: "Enfant 1",
+                        total_score: 95.5,
+                        quiz_count: 12
+                    },
+                    {
+                        userID: "USER002",
+                        kidIndex: "Enfant 2",
+                        total_score: 87.2,
+                        quiz_count: 10
+                    },
+                    {
+                        userID: "USER003",
+                        kidIndex: "Enfant 3",
+                        total_score: 92.8,
+                        quiz_count: 15
+                    },
+                    {
+                        userID: "USER004",
+                        kidIndex: "Enfant 4",
+                        total_score: 78.9,
+                        quiz_count: 8
+                    },
+                    {
+                        userID: "USER005",
+                        kidIndex: "Enfant 5",
+                        total_score: 85.3,
+                        quiz_count: 11
+                    }
+                ];
+            }
+        }
+
+        // Fonction pour générer les initiales
+        function getInitials(userID) {
+            return userID.substring(0, 2).toUpperCase();
+        }
+
+        // Fonction pour formater le score
+        function formatScore(score) {
+            return score.toFixed(2);
+        }
+
+        // Fonction pour générer le classement
+        function generateLeaderboard(data) {
+            const leaderboardContent = document.getElementById('leaderboard-content');
+            const showMoreContainer = document.getElementById('show-more-container');
+            
+            if (data.length === 0) {
+                leaderboardContent.innerHTML = '<div class="player-row" style="text-align: center; padding: 2rem;">Aucune donnée disponible</div>';
+                showMoreContainer.style.display = 'none';
+                return;
+            }
+            
+            // Trier les enfants par score total
+            data.sort((a, b) => b.total_score - a.total_score);
+            
+            // Déterminer combien d'enfants afficher
+            const childrenToShow = Math.min(displayedChildrenCount, data.length);
+            
+            let leaderboardHTML = '';
+            
+            for (let i = 0; i < childrenToShow; i++) {
+                const child = data[i];
+                const rank = i + 1;
+                const rowClass = rank <= 3 ? `top-${rank}` : '';
+                
+                leaderboardHTML += `
+                    <div class="player-row ${rowClass}" data-index="${i}">
+                        <div class="rank">${rank}</div>
+                        <div class="player-info">
+                            <div class="avatar">${getInitials(child.userID)}</div>
+                            <div class="player-details">
+                                <div class="player-name"> ${child.kidIndex}</div>
+                                <div class="player-parent">ID: ${child.userID}</div>
+                            </div>
+                        </div>
+                        <div class="score">${formatScore(child.total_score)}</div>
+                        <div class="score">
+                            ${child.quiz_count}</div>
+                    </div>
+                `;
+            }
+            
+            leaderboardContent.innerHTML = leaderboardHTML;
+            
+            // Afficher ou masquer le bouton "Afficher plus"
+            if (data.length > displayedChildrenCount) {
+                showMoreContainer.style.display = 'flex';
+            } else {
+                showMoreContainer.style.display = 'none';
+            }
+            
+            // Ajouter les événements de clic
+            document.querySelectorAll('.player-row').forEach(row => {
+                row.addEventListener('click', () => {
+                    const index = parseInt(row.getAttribute('data-index'));
+                    openDashboard(data[index], index + 1, data.length);
+                });
+            });
+        }
+
+        // Fonction pour ouvrir le dashboard
+        function openDashboard(child, rank, totalStudents) {
+            const modal = document.getElementById('dashboard-modal');
+            const dashboardName = document.getElementById('dashboard-name');
+            const dashboardParent = document.getElementById('dashboard-parent');
+            const infoScore = document.getElementById('info-score');
+            const infoRank = document.getElementById('info-rank');
+            const infoQuizzes = document.getElementById('info-quizzes');
+            const totalStudentsSpan = document.getElementById('total-students');
+            const viewFullDashboard = document.getElementById('view-full-dashboard');
+            
+            // Mettre à jour les informations du dashboard
+            dashboardName.textContent = `Enfant ${child.kidIndex}`;
+            dashboardParent.textContent = `ID: ${child.userID}`;
+            infoScore.textContent = formatScore(child.total_score);
+            infoRank.textContent = `#${rank}`;
+            infoQuizzes.textContent = child.quiz_count;
+            totalStudentsSpan.textContent = totalStudents;
+            
+            // Configurer le lien vers le dashboard complet
+            viewFullDashboard.onclick = () => {
+                window.location.href = `/auth/dashboard/${child.userID}`;
+            };
+            
+            // Afficher le modal
+            modal.style.display = 'flex';
+        }
+
+        // Fonction pour afficher plus d'enfants
+        function showMoreChildren() {
+            displayedChildrenCount += 10; // Augmenter de 10 le nombre d'enfants à afficher
+            generateLeaderboard(filteredChildren);
+        }
+
+        // Fonction pour appliquer les filtres du leaderboard
+        function applyLeaderboardFilters() {
+            // Cette fonction serait implémentée pour filtrer les données
+            // en fonction des sélections dans les menus déroulants
+            // Pour l'instant, nous affichons simplement toutes les données
+            displayedChildrenCount = 10; // Réinitialiser le compteur
+            generateLeaderboard(childrenData);
+        }
+
+        // Charger les données du leaderboard
+        async function loadLeaderboardData() {
+            // Afficher le loader
+            document.getElementById('leaderboard-content').innerHTML = `
+                <div class="loader">
+                    <div class="spinner"></div>
+                </div>
+            `;
+            
+            // Récupérer les données des enfants
+            childrenData = await fetchChildrenData();
+            filteredChildren = [...childrenData];
+            
+            // Générer le classement
+            generateLeaderboard(filteredChildren);
+        }
+    </script>
+</body>
+</html>

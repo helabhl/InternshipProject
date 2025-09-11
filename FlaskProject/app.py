@@ -28,6 +28,7 @@ from routes.authRoute import auth_bp
 from routes.adminRoute import admin_bp
 from routes.attemptRoute import attempts_bp
 from routes.performanceRoute import performance_bp
+from routes.statsAdminRoute import stats_bp
 
 app.register_blueprint(accounts_bp)
 app.register_blueprint(quiz_bp)
@@ -35,6 +36,7 @@ app.register_blueprint(attempts_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(performance_bp)
+app.register_blueprint(stats_bp)
 
 # --- Scheduler function ---
 def mark_timeout_attempts():
@@ -100,6 +102,14 @@ def dashboard_admin():
 @app.route("/login_admin")
 def login():
     return render_template("admin/login.html")
+
+@app.route("/leaderboard")
+def leaderBoard():
+    return render_template("admin/test.html")
+
+@app.route("/board")
+def Board():
+    return render_template("admin/leaderboard.html")
 
 # --- Run the app ---
 if __name__ == "__main__":

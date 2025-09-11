@@ -1137,25 +1137,68 @@
                 '#FF9E40',
                 '#47D764',
                 '#4A6DA7',
-                '#9B5DE5',
                 '#4ECDC4'
             ];
 
-            // Liste d'icônes possibles
-            const icons = [
-                "fas fa-trophy",
-                "fas fa-medal",
-                "fas fa-star",
-                "fas fa-lightbulb",
-                "fas fa-compass",
-                "fas fa-brain",
-                "fas fa-exclamation-circle",
-                "fas fa-bomb",
-            ];
+            
 
             const getRandomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
             const createMessageLi = (code, defaultCode) => {
+                const messageIconMap = {
+                    // Engagement
+                    'ENGAGEMENT_HIGH': 'fas fa-star',
+                    'ENGAGEMENT_GOOD': 'fas fa-calendar-check',
+                    'ENGAGEMENT_AVERAGE': 'fas fa-chart-line',
+                    'ENGAGEMENT_LOW': 'fas fa-exclamation-circle',
+                    'ENGAGEMENT_NONE': 'fas fa-ban',
+
+                    // Streak
+                    'STREAK_7': 'fas fa-fire',
+                    'STREAK_5': 'fas fa-trophy',
+                    'STREAK_3': 'fas fa-bullseye',
+
+                    // Completion
+                    'COMPLETION_EXCELLENT': 'fas fa-check-circle',
+                    'COMPLETION_GOOD': 'fas fa-clipboard-check',
+                    'COMPLETION_AVERAGE': 'fas fa-tasks',
+                    'COMPLETION_STARTED': 'fas fa-rocket',
+                    'COMPLETION_LOW_ALERT': 'fas fa-times-circle',
+
+                    // Mastery
+                    'MASTERY_EXCELLENT': 'fas fa-crown',
+                    'MASTERY_GOOD': 'fas fa-star-half-alt',
+                    'MASTERY_AVERAGE': 'fas fa-lightbulb',
+                    'MASTERY_LOW_ALERT': 'fas fa-search',
+
+                    // Abandon
+                    'ABANDON_ALERT': 'fas fa-door-open',
+
+                    // Perseverance
+                    'PERSEVERANCE_STRONG': 'fas fa-dumbbell',
+                    'PERSEVERANCE_GOOD': 'fas fa-sync-alt',
+                    'PERSEVERANCE_RETRIES': 'fas fa-redo',
+
+                    // Balance
+                    'BALANCE_LOW': 'fas fa-balance-scale-left',
+                    'BALANCE_GOOD': 'fas fa-balance-scale',
+
+                    // Time
+                    'TIME_HIGH': 'fas fa-clock',
+                    'TIME_MEDIUM': 'fas fa-hourglass-half',
+                    'TIME_LOW': 'fas fa-stopwatch',
+
+                    // Inspiration
+                    'INSPIRATION_WEEK': 'fas fa-seedling',
+                    'INSPIRATION_MONTH': 'fas fa-tree',
+
+                    // Defaults
+                    'DEFAULT_ACHIEVEMENT': 'fas fa-gem',
+                    'DEFAULT_ALERT': 'fas fa-info-circle',
+                    'DEFAULT_RECOMMENDATION': 'fas fa-lightbulb',
+                    'DEFAULT_NO_ACTIVITY': 'fas fa-ban'
+                };
+
                 // Map old codes to new localization keys
                 const messageKeyMap = {
                     'ENGAGEMENT_HIGH': 'messages.engagement.high',
@@ -1163,9 +1206,16 @@
                     'ENGAGEMENT_AVERAGE': 'messages.engagement.average',
                     'ENGAGEMENT_LOW': 'messages.engagement.low',
                     'ENGAGEMENT_NONE': 'messages.engagement.none',
-                    'STREAK_7': 'messages.streak.seven',
-                    'STREAK_5': 'messages.streak.five',
-                    'STREAK_3': 'messages.streak.three',
+                    // Streak – semaine
+                    'STREAK_WEEK_7': 'messages.streak.week_7',
+                    'STREAK_WEEK_5': 'messages.streak.week_5',
+                    'STREAK_WEEK_3': 'messages.streak.week_3',
+
+                    // Streak – mois
+                    'STREAK_MONTH_21': 'messages.streak.month_21',
+                    'STREAK_MONTH_14': 'messages.streak.month_14',
+                    'STREAK_MONTH_7': 'messages.streak.month_7',
+
                     'COMPLETION_EXCELLENT': 'messages.completion.excellent',
                     'COMPLETION_GOOD': 'messages.completion.good',
                     'COMPLETION_AVERAGE': 'messages.completion.average',
@@ -1195,18 +1245,19 @@
                 const key = messageKeyMap[code] || messageKeyMap[defaultCode];
                 const title = window.i18n.t(`${key}.title`);
                 const desc = window.i18n.t(`${key}.desc`);
-                const icon = getRandomItem(icons);
-                const color = getRandomItem(palette);
+                // 👇 هنا التغيير
+                const icon = messageIconMap[code] || messageIconMap[defaultCode] || "fas fa-comment";
+                const color = getRandomItem(palette); // ممكن تخلي الألوان عشوائية فقط
 
                 const li = document.createElement("li");
                 li.className = "card-item";
                 li.innerHTML = `
-            <i class="${icon}" style="color:${color};"></i>
-            <div class="card-item-content">
-                <div class="card-item-title">${title}</div>
-                <div class="card-item-desc">${desc}</div>
-            </div>
-        `;
+                    <i class="${icon}" style="color:${color}; font-size: 20px;"></i>
+                    <div class="card-item-content">
+                        <div class="card-item-title">${title}</div>
+                        <div class="card-item-desc">${desc}</div>
+                    </div>
+                `;
                 return li;
             };
 

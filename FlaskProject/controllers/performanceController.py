@@ -111,7 +111,7 @@ class PerformanceController:
             engagement_rate = days / total_days if total_days > 0 else 0
 
             # Engagement
-            if engagement_rate >= 0.8:
+            if engagement_rate == 1.0:
                 achievements.append(f"ENGAGEMENT_HIGH")
             elif engagement_rate >= 0.6:
                 achievements.append(f"ENGAGEMENT_GOOD")
@@ -122,12 +122,21 @@ class PerformanceController:
 
             # Streak
             streak = metrics["streak"]
-            if streak >= 7:
-                achievements.append(f"STREAK_7")
-            elif streak >= 5:
-                achievements.append(f"STREAK_5")
-            elif streak >= 3:
-                achievements.append(f"STREAK_3")
+            if period == "week":
+                if streak >= 7:
+                    return "STREAK_WEEK_7"
+                elif streak >= 5:
+                    return "STREAK_WEEK_5"
+                elif streak >= 3:
+                    return "STREAK_WEEK_3"
+            elif period == "month":
+                if streak >= 21:
+                    return "STREAK_MONTH_21"
+                elif streak >= 14:
+                    return "STREAK_MONTH_14"
+                elif streak >= 7:
+                    return "STREAK_MONTH_7"
+
 
             # Completion
             completed, started = metrics["completion_rate"]
@@ -545,24 +554,38 @@ def calculate_engagement(attempts, from_date, to_date):
     total_days = (to_date.date() - from_date.date()).days + 1
     return len(practice_days), total_days
 
+
 def calculate_streak(attempts):
-    """Plus longue série de quiz réussis (completed=1)"""
+    """
+    Calcule le nombre maximum de jours consécutifs avec au moins un quiz complété.
+    """
     if not attempts:
         return 0
-        
-    sorted_attempts = sorted(attempts, key=lambda x: x["start_time"])
-    
-    current_streak = 0
-    max_streak = 0
 
-    for attempt in sorted_attempts:
-        if attempt.get("completed", 0) == 1:
+    # Extraire les dates des tentatives complétées
+    completed_days = set()
+    for a in attempts:
+        if a.get("completed", 0) == 1:
+            completed_days.add(a["start_time"].date())
+
+    if not completed_days:
+        return 0
+
+    # Trier les dates
+    sorted_days = sorted(completed_days)
+
+    max_streak = 1
+    current_streak = 1
+
+    for i in range(1, len(sorted_days)):
+        if sorted_days[i] == sorted_days[i-1] + timedelta(days=1):
             current_streak += 1
             max_streak = max(max_streak, current_streak)
         else:
-            current_streak = 0
-    
+            current_streak = 1
+
     return max_streak
+    
 
 def calculate_completion_rate(attempts):
     """Taux de complétion des quiz"""

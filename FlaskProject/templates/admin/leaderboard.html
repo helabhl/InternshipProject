@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -68,21 +69,20 @@
 
         .logo i {
             font-size: 2rem;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: white; /* Logo en blanc */
         }
 
         .logo h1 {
             font-size: 1.6rem;
             font-weight: 700;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+            color: white; /* Texte du logo en blanc */
         }
 
         nav ul {
             display: flex;
             list-style: none;
-            gap: 1.5rem;
+            gap: 0.5rem; /* Espacement réduit entre les boutons */
             align-items: center;
         }
 
@@ -105,40 +105,41 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
+        /* Boutons séparés */
+        .header-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .header-btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .header-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+
         /* Main container */
         .main-container {
             max-width: 1400px;
             margin: 2rem auto;
             padding: 0 1.5rem;
-        }
-
-        /* View Toggle */
-        .view-toggle {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 2rem;
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 0.5rem;
-            box-shadow: var(--card-shadow);
-        }
-
-        .view-btn {
-            padding: 0.8rem 2rem;
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            color: var(--gray);
-            transition: var(--transition);
-            border-radius: 30px;
-        }
-
-        .view-btn.active {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
         }
 
         /* Dashboard Views */
@@ -347,7 +348,6 @@
 
         .subject-grade-bold {
             font-weight: bold;
-            color: var(--primary);
         }
 
         .subject-stats-grid {
@@ -811,6 +811,11 @@
                 gap: 1rem;
             }
             
+            .header-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            
             .stats-grid {
                 grid-template-columns: 1fr;
             }
@@ -894,6 +899,11 @@
                 width: 100%;
                 justify-content: center;
             }
+            
+            .header-btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -906,233 +916,231 @@
                 <h1 data-i18n="header.title">Ferid Around The World</h1>
             </div>
             
-            <nav>
-                <ul>
-                    <li><a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a></li>
-                    <li><a href="#"><i class="fas fa-user-graduate"></i> Élèves</a></li>
-                    <li><a href="#"><i class="fas fa-chart-bar"></i> Rapports</a></li>
-                </ul>
-            </nav>
+            <!-- Boutons séparés -->
+            <div class="header-buttons">
+                <button class="header-btn active" data-view="admin-dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="header-btn" data-view="leaderboard">
+                    <i class="fas fa-trophy"></i>
+                    <span>Leaderboard</span>
+                </button>
+            </div>
         </div>
     </header>
 
     <!-- Main Content -->
     <div class="main-container">
-        <!-- View Toggle -->
-        <div class="view-toggle">
-            <button class="view-btn active" data-view="admin-dashboard">Tableau de bord Admin</button>
-            <button class="view-btn" data-view="leaderboard">Classement des Enfants</button>
-        </div>
 
-        <!-- Admin Dashboard View -->
-        <div id="admin-dashboard" class="dashboard-view active">
-            <div class="dashboard-container">
-                <!-- Filters -->
-                <div class="filters-container">
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label class="filter-label">Année scolaire</label>
-                            <select class="filter-select" id="grade-filter">
-                                <option value="all">Toutes les années</option>
-                                <option value="السنة الأولى">1ère année</option>
-                                <option value="السنة الثانية">2ème année</option>
-                                <option value="السنة الثالثة">3ème année</option>
-                                <option value="السنة الرابعة">4ème année</option>
-                                <option value="السنة الخامسة">5ème année</option>
-                                <option value="السنة السادسة">6ème année</option>
-                            </select>
-                        </div>
-                        
-                        <div class="filter-group">
-                            <label class="filter-label">Matière</label>
-                            <select class="filter-select" id="subject-filter">
-                                <option value="all">Toutes les matières</option>
-                                <option value="اللغة العربية">Arabe</option>
-                                <option value="اللغة الإنجليزية">Anglais</option>
-                                <option value="الرياضيات">Mathématiques</option>
-                                <option value="العلوم">Sciences</option>
-                                <option value="التاريخ">Histoire</option>
-                                <option value="الجغرافيا">Géographie</option>
-                            </select>
-                        </div>
-                        
-                        <div class="filter-group">
-                            <label class="filter-label">Période</label>
-                            <select class="filter-select" id="time-filter">
-                                <option value="7">7 derniers jours</option>
-                                <option value="14">14 derniers jours</option>
-                                <option value="30">30 derniers jours</option>
-                                <option value="90">3 derniers mois</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stats Cards -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <i class="fas fa-users"></i>
-                        <h3 id="total-students">0</h3>
-                        <p>Élèves actifs</p>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-check-circle"></i>
-                        <h3 id="quiz-attempts">0</h3>
-                        <p>Tentatives de quiz</p>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-chart-bar"></i>
-                        <h3 id="avg-score">0%</h3>
-                        <p>Score moyen</p>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-clock"></i>
-                        <h3 id="avg-time">0</h3>
-                        <p>Temps moyen (min)</p>
-                    </div>
-                </div>
-
-                <!-- Charts -->
-                <div class="charts-container">
-                    <div class="chart-card">
-                        <div class="chart-title">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>Engagement par année</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="gradeChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-title">
-                            <i class="fas fa-chart-pie"></i>
-                            <span>Répartition par matière</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="subjectChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Subject Stats - Nouvelle disposition en grille -->
-                <div class="subject-stats">
-                    <div class="chart-title">
-                        <i class="fas fa-book"></i>
-                        <span>Matières et répartition par année</span>
-                    </div>
-                    <div class="subject-grid" id="subjectStatsContainer">
-                        <!-- Les cartes des matières seront générées ici par JavaScript -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Leaderboard View -->
-        <div id="leaderboard" class="dashboard-view">
+    <!-- Admin Dashboard View -->
+    <div id="admin-dashboard" class="dashboard-view active">
+        <div class="dashboard-container">
             <!-- Filters -->
-            <div class="leaderboard-filters">
+            <div class="filters-container">
                 <div class="filter-row">
                     <div class="filter-group">
-                        <label class="filter-label">Année scolaire</label>
-                        <select class="filter-select" id="leaderboard-grade-filter">
-                            <option value="all">Toutes les années</option>
-                            <option value="السنة الأولى">1ère année</option>
-                            <option value="السنة الثانية">2ème année</option>
-                            <option value="السنة الثالثة">3ème année</option>
-                            <option value="السنة الرابعة">4ème année</option>
-                            <option value="السنة الخامسة">5ème année</option>
-                            <option value="السنة السادسة">6ème année</option>
+                        <label class="filter-label">School Year</label>
+                        <select class="filter-select" id="grade-filter">
+                            <option value="all">All Grades</option>
+                            <option value="السنة الأولى">1st Grade</option>
+                            <option value="السنة الثانية">2nd Grade</option>
+                            <option value="السنة الثالثة">3rd Grade</option>
+                            <option value="السنة الرابعة">4th Grade</option>
+                            <option value="السنة الخامسة">5th Grade</option>
+                            <option value="السنة السادسة">6th Grade</option>
                         </select>
                     </div>
                     
                     <div class="filter-group">
-                        <label class="filter-label">Matière</label>
-                        <select class="filter-select" id="leaderboard-subject-filter">
-                            <option value="all">Toutes les matières</option>
-                            <option value="اللغة العربية">Arabe</option>
-                            <option value="اللغة الإنجليزية">Anglais</option>
-                            <option value="الرياضيات">Mathématiques</option>
-                            <option value="العلوم">Sciences</option>
-                            <option value="التاريخ">Histoire</option>
-                            <option value="الجغرافيا">Géographie</option>
+                        <label class="filter-label">Subject</label>
+                        <select class="filter-select" id="subject-filter">
+                            <option value="all">All Subjects</option>
+                            <option value="اللغة العربية">Arabic</option>
+                            <option value="اللغة الإنجليزية">English</option>
+                            <option value="الرياضيات">Mathematics</option>
+                            <option value="العلوم">Science</option>
+                            <option value="التاريخ">History</option>
+                            <option value="الجغرافيا">Geography</option>
                         </select>
                     </div>
                     
                     <div class="filter-group">
-                        <label class="filter-label">Période</label>
-                        <select class="filter-select" id="leaderboard-time-filter">
-                            <option value="7">7 derniers jours</option>
-                            <option value="14">14 derniers jours</option>
-                            <option value="30">30 derniers jours</option>
-                            <option value="90">3 derniers mois</option>
+                        <label class="filter-label">Period</label>
+                        <select class="filter-select" id="time-filter">
+                            <option value="7">Last 7 Days</option>
+                            <option value="14">Last 14 Days</option>
+                            <option value="30">Last 30 Days</option>
+                            <option value="90">Last 3 Months</option>
                         </select>
                     </div>
                 </div>
             </div>
 
-            <!-- Leaderboard -->
-            <div class="leaderboard">
-                <div class="leaderboard-header">
-                    <div>Rang</div>
-                    <div>Enfant</div>
-                    <div>Score</div>
-                    <div>Quiz</div>
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <h3 id="total-students">0</h3>
+                    <p>Active Students</p>
                 </div>
+                <div class="stat-card">
+                    <i class="fas fa-check-circle"></i>
+                    <h3 id="quiz-attempts">0</h3>
+                    <p>Quiz Attempts</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3 id="avg-score">0%</h3>
+                    <p>Average Score</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-clock"></i>
+                    <h3 id="avg-time">0</h3>
+                    <p>Average Time (min)</p>
+                </div>
+            </div>
 
-                <div class="leaderboard-content" id="leaderboard-content">
-                    <div class="loader">
-                        <div class="spinner"></div>
+            <!-- Charts -->
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Engagement by Grade</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="gradeChart"></canvas>
                     </div>
                 </div>
-                
-                <!-- Show more button container -->
-                <div class="show-more-container" id="show-more-container" style="display: none;">
-                    <button class="show-more-btn" id="show-more-btn">Afficher plus d'enfants</button>
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Subject Distribution</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="subjectChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subject Stats -->
+            <div class="subject-stats">
+                <div class="chart-title">
+                    <i class="fas fa-book"></i>
+                    <span>Subjects & Distribution by Grade</span>
+                </div>
+                <div class="subject-grid" id="subjectStatsContainer">
+                    <!-- Cards generated by JS -->
                 </div>
             </div>
         </div>
+    </div>
+
+    
+    <!-- Leaderboard View -->
+    <div id="leaderboard" class="dashboard-view">
+    <div class="leaderboard-filters">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label class="filter-label">School Year</label>
+                <select class="filter-select" id="leaderboard-grade-filter">
+                    <option value="all">All Grades</option>
+                    <option value="السنة الأولى">1st Grade</option>
+                    <option value="السنة الثانية">2nd Grade</option>
+                    <option value="السنة الثالثة">3rd Grade</option>
+                    <option value="السنة الرابعة">4th Grade</option>
+                    <option value="السنة الخامسة">5th Grade</option>
+                    <option value="السنة السادسة">6th Grade</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Subject</label>
+                <select class="filter-select" id="leaderboard-subject-filter">
+                    <option value="all">All Subjects</option>
+                    <option value="اللغة العربية">Arabic</option>
+                    <option value="اللغة الإنجليزية">English</option>
+                    <option value="الرياضيات">Mathematics</option>
+                    <option value="العلوم">Science</option>
+                    <option value="التاريخ">History</option>
+                    <option value="الجغرافيا">Geography</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Period</label>
+                <select class="filter-select" id="leaderboard-time-filter">
+                    <option value="7">Last 7 Days</option>
+                    <option value="14">Last 14 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 3 Months</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="leaderboard">
+        <div class="leaderboard-header">
+            <div>Rank</div>
+            <div>Child</div>
+            <div>Score</div>
+            <div>Quizzes</div>
+        </div>
+
+        <div class="leaderboard-content" id="leaderboard-content">
+            <div class="loader">
+                <div class="spinner"></div>
+            </div>
+        </div>
+        
+        <div class="show-more-container" id="show-more-container" style="display: none;">
+            <button class="show-more-btn" id="show-more-btn">Show More Children</button>
+        </div>
+    </div>
     </div>
 
     <!-- Dashboard Modal -->
     <div class="dashboard-modal" id="dashboard-modal">
-        <div class="dashboard-content">
-            <button class="close-modal" id="close-modal">&times;</button>
-            <div class="dashboard-header">
-                <h2 class="dashboard-title" id="dashboard-name">Nom de l'Enfant</h2>
-                <p class="dashboard-subtitle" id="dashboard-parent">Parent: ID: Chargement...</p>
+    <div class="dashboard-content">
+        <button class="close-modal" id="close-modal">&times;</button>
+        <div class="dashboard-header">
+            <h2 class="dashboard-title" id="dashboard-name">Child Name</h2>
+            <p class="dashboard-subtitle" id="dashboard-parent">Parent: ID: Loading...</p>
+        </div>
+        
+        <div class="dashboard-info">
+            <div class="info-card">
+                <div class="info-label">Total Score</div>
+                <div class="info-value" id="info-score">0</div>
+                <div class="info-label">points</div>
             </div>
             
-            <div class="dashboard-info">
-                <div class="info-card">
-                    <div class="info-label">Score Total</div>
-                    <div class="info-value" id="info-score">0</div>
-                    <div class="info-label">points</div>
-                </div>
-                
-                <div class="info-card">
-                    <div class="info-label">Rang</div>
-                    <div class="info-value" id="info-rank">0</div>
-                    <div class="info-label">sur <span id="total-students">0</span> enfants</div>
-                </div>
-                
-                <div class="info-card">
-                    <div class="info-label">Quiz</div>
-                    <div class="info-value" id="info-quizzes">0</div>
-                    <div class="info-label">complétés</div>
-                </div>
-            </div>            
-            
-            <div class="dashboard-actions">
-                <button class="action-btn" id="view-full-dashboard">Voir le dashboard complet</button>
+            <div class="info-card">
+                <div class="info-label">Rank</div>
+                <div class="info-value" id="info-rank">0</div>
+                <div class="info-label">out of <span id="total-students">0</span> children</div>
             </div>
+            
+            <div class="info-card">
+                <div class="info-label">Quizzes</div>
+                <div class="info-value" id="info-quizzes">0</div>
+                <div class="info-label">completed</div>
+            </div>
+        </div>            
+        
+        <div class="dashboard-actions">
+            <button class="action-btn" id="view-full-dashboard">View Full Dashboard</button>
         </div>
     </div>
+    </div>
+
 
     <script>
         // ========== VIEW TOGGLE FUNCTIONALITY ==========
+        // ========== VIEW TOGGLE FUNCTIONALITY ==========
         document.addEventListener('DOMContentLoaded', function() {
             // View toggle functionality
-            const viewButtons = document.querySelectorAll('.view-btn');
+            const viewButtons = document.querySelectorAll('.header-btn');
             const views = document.querySelectorAll('.dashboard-view');
             
             viewButtons.forEach(button => {
@@ -1148,12 +1156,10 @@
                     document.getElementById(viewId).classList.add('active');
                 });
             });
-            
             // Initialize both dashboards
             initializeAdminDashboard();
             initializeLeaderboard();
         });
-
         // ========== ADMIN DASHBOARD FUNCTIONALITY ==========
         // Variables globales pour stocker les données
         let gradeStatsData = {};
@@ -1410,7 +1416,7 @@
 
                         const scoreValue = document.createElement('div');
                         scoreValue.className = 'chapter-stat-value';
-                        scoreValue.style.color = getScoreColor(chapterData.average_score);
+                        scoreValue.style.color = chapterData.average_score;
                         scoreValue.textContent = `${((chapterData.average_score || 0) * 100).toFixed(1)}%`;
 
                         const scoreLabel = document.createElement('div');
@@ -1489,12 +1495,7 @@
             return stat;
         }
 
-        // Fonction pour obtenir la couleur en fonction du score
-        function getScoreColor(score) {
-            if (score >= 0.8) return '#2ecc71'; // Vert pour les scores élevés
-            if (score >= 0.5) return '#f39c12'; // Orange pour les scores moyens
-            return '#e74c3c'; // Rouge pour les scores bas
-        }
+        
 
         // ========== LEADERBOARD FUNCTIONALITY ==========
         // Variables globales
@@ -1539,45 +1540,12 @@
                 return data;
             } catch (error) {
                 console.error('Erreur:', error);
-                // Retourner des données de démonstration en cas d'erreur
-                return [
-                    {
-                        userID: "USER001",
-                        kidIndex: "Enfant 1",
-                        total_score: 95.5,
-                        quiz_count: 12
-                    },
-                    {
-                        userID: "USER002",
-                        kidIndex: "Enfant 2",
-                        total_score: 87.2,
-                        quiz_count: 10
-                    },
-                    {
-                        userID: "USER003",
-                        kidIndex: "Enfant 3",
-                        total_score: 92.8,
-                        quiz_count: 15
-                    },
-                    {
-                        userID: "USER004",
-                        kidIndex: "Enfant 4",
-                        total_score: 78.9,
-                        quiz_count: 8
-                    },
-                    {
-                        userID: "USER005",
-                        kidIndex: "Enfant 5",
-                        total_score: 85.3,
-                        quiz_count: 11
-                    }
-                ];
             }
         }
 
         // Fonction pour générer les initiales
-        function getInitials(userID) {
-            return userID.substring(0, 2).toUpperCase();
+        function getInitials(kidIndex) {
+            return kidIndex.substring(0, 2).toUpperCase();
         }
 
         // Fonction pour formater le score
@@ -1613,7 +1581,7 @@
                     <div class="player-row ${rowClass}" data-index="${i}">
                         <div class="rank">${rank}</div>
                         <div class="player-info">
-                            <div class="avatar">${getInitials(child.userID)}</div>
+                            <div class="avatar">${getInitials(child.kidIndex)}</div>
                             <div class="player-details">
                                 <div class="player-name"> ${child.kidIndex}</div>
                                 <div class="player-parent">ID: ${child.userID}</div>
@@ -1678,14 +1646,30 @@
             generateLeaderboard(filteredChildren);
         }
 
-        // Fonction pour appliquer les filtres du leaderboard
-        function applyLeaderboardFilters() {
-            // Cette fonction serait implémentée pour filtrer les données
-            // en fonction des sélections dans les menus déroulants
-            // Pour l'instant, nous affichons simplement toutes les données
-            displayedChildrenCount = 10; // Réinitialiser le compteur
-            generateLeaderboard(childrenData);
+    // Fonction pour appliquer les filtres du leaderboard
+    async function applyLeaderboardFilters() {
+        const gradeFilter = document.getElementById('leaderboard-grade-filter').value;
+        const subjectFilter = document.getElementById('leaderboard-subject-filter').value;
+        const timeFilter = document.getElementById('leaderboard-time-filter').value;
+
+        const query = new URLSearchParams({
+            grade: gradeFilter !== 'all' ? gradeFilter : '',
+            subject: subjectFilter !== 'all' ? subjectFilter : '',
+            period: timeFilter
+        });
+
+        try {
+            const response = await fetch(`/api/stats/kids?${query}`);
+            const data = await response.json();
+
+            filteredChildren = data;
+
+                        generateLeaderboard(filteredChildren);
+        } catch (error) {
+            console.error('Erreur lors du filtrage des données:', error);
         }
+    }
+   
 
         // Charger les données du leaderboard
         async function loadLeaderboardData() {

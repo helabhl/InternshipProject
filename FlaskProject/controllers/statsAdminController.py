@@ -57,7 +57,7 @@ def stats_overview(attempts):
     scores = [a.get("score") for a in attempts if a.get("score") is not None]
     average_score = (sum(scores) / len(scores)) if scores else 0
     times = [a.get("duration") for a in attempts if a.get("duration") is not None]
-    average_time = (sum(times) / total_students) / 60 if total_students else 0
+    average_time = (sum(times) / total_students) if total_students else 0
 
     return {
         "total_students": total_students,
@@ -245,12 +245,16 @@ def get_unique_students_from_attempts():
         
         student_scores.append({
             "userID": user_id,
-            "kidIndex": get_kids_names(user_id)[0][kid_index],
+            "kidIndex": kid_index,
+            "kidName": get_kids_names(user_id)[0][kid_index],
             "total_score": round(total_score,2),
             "quiz_count": quiz_count,
             "average_score": round(average_score, 2),
             "quiz_scores": quiz_scores  # Dictionnaire {quiz_id: meilleur_score}
         })
+
+        student_scores = sorted(student_scores, key=lambda x: x["total_score"], reverse=True)
+
     
     return student_scores
 

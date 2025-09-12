@@ -52,13 +52,13 @@ def verify():
     return render_template("users/verify.html")
 
 
-@auth_bp.route("/auth/dashboard/<userID>", methods=["GET"])
-def get_dashboard(userID): 
+@auth_bp.route("/auth/dashboard/<userID>/<kidIndex>", methods=["GET"])
+def get_dashboard(userID, kidIndex): 
     if not userID: 
         return "userID is required", 400 
     account = AccountData.objects(userID=userID).first() 
     if not account: 
         return "User not found", 404 
     # On passe l'objet account au template dashboard.html 
-    return render_template("users/dashboard.html", parent=account)
+    return render_template("users/dashboard.html", parent=account, kid=kidIndex)
    

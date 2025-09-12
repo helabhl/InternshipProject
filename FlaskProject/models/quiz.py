@@ -11,6 +11,7 @@ from mongoengine import (
 )
 from datetime import datetime, timezone
 
+from mongoengine import DynamicEmbeddedDocument
 
 class Suggestion(EmbeddedDocument):
     txt = StringField()
@@ -19,7 +20,7 @@ class Suggestion(EmbeddedDocument):
     snd_url = StringField()
 
 
-class Question(EmbeddedDocument):
+class Question(DynamicEmbeddedDocument):
     question_type = ListField(StringField())
     txt = StringField()
     img_url = StringField()
@@ -32,7 +33,7 @@ class Question(EmbeddedDocument):
     open = BooleanField()
 
 
-class Layer(EmbeddedDocument):
+class Layer(DynamicEmbeddedDocument):
     name = StringField()
 
 

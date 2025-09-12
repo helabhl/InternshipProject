@@ -1137,29 +1137,42 @@
 
     <script>
         // ========== VIEW TOGGLE FUNCTIONALITY ==========
-        // ========== VIEW TOGGLE FUNCTIONALITY ==========
         document.addEventListener('DOMContentLoaded', function() {
-            // View toggle functionality
             const viewButtons = document.querySelectorAll('.header-btn');
             const views = document.querySelectorAll('.dashboard-view');
-            
+
+            function initializeView(viewId) {
+                if (viewId === "admin-dashboard") {
+                    initializeAdminDashboard();
+                } else if (viewId === "leaderboard") {
+                    initializeLeaderboard();
+                }
+            }
+
             viewButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const viewId = this.getAttribute('data-view');
-                    
+
                     // Update active button
                     viewButtons.forEach(btn => btn.classList.remove('active'));
                     this.classList.add('active');
-                    
+
                     // Show selected view
                     views.forEach(view => view.classList.remove('active'));
                     document.getElementById(viewId).classList.add('active');
+
+                    // Initialize only the selected view
+                    initializeView(viewId);
                 });
             });
-            // Initialize both dashboards
-            initializeAdminDashboard();
-            initializeLeaderboard();
-        });
+
+    // Initialisation au premier bouton actif par défaut
+    const activeButton = document.querySelector('.header-btn.active');
+    if (activeButton) {
+        initializeView(activeButton.getAttribute('data-view'));
+    }
+});
+
         // ========== ADMIN DASHBOARD FUNCTIONALITY ==========
         // Variables globales pour stocker les données
         let gradeStatsData = {};
@@ -1233,7 +1246,13 @@
             document.getElementById('total-students').textContent = overviewData.total_students.toLocaleString();
             document.getElementById('quiz-attempts').textContent = overviewData.total_attempts.toLocaleString();
             document.getElementById('avg-score').textContent = (overviewData.average_score * 100).toFixed(1) + '%';
-            document.getElementById('avg-time').textContent = overviewData.average_time.toFixed(1);
+            // Temps d'étude en minutes
+            const studyTime = overviewData.average_time.toFixed(2) || 0;
+            const hours = Math.floor(studyTime / 60)/60;
+            const minutes = Math.floor(studyTime / 60) % 60;
+            const hoursText = window.i18n.t('time.hours');
+            const minutesText = window.i18n.t('time.minutes');
+            document.getElementById('avg-time').innerText = `${hours.toFixed(0)}h ${minutes.toFixed(0)}min`;
         }
 
         let gradeChartInstance = null;
@@ -1495,8 +1514,6 @@
             return stat;
         }
 
-        
-
         // ========== LEADERBOARD FUNCTIONALITY ==========
         // Variables globales
         let childrenData = [];
@@ -1545,7 +1562,7 @@
 
         // Fonction pour générer les initiales
         function getInitials(kidIndex) {
-            return kidIndex.substring(0, 2).toUpperCase();
+            return kidIndex.substring(0, 1).toUpperCase();
         }
 
         // Fonction pour formater le score
@@ -1564,8 +1581,7 @@
                 return;
             }
             
-            // Trier les enfants par score total
-            data.sort((a, b) => b.total_score - a.total_score);
+            
             
             // Déterminer combien d'enfants afficher
             const childrenToShow = Math.min(displayedChildrenCount, data.length);
@@ -1581,9 +1597,9 @@
                     <div class="player-row ${rowClass}" data-index="${i}">
                         <div class="rank">${rank}</div>
                         <div class="player-info">
-                            <div class="avatar">${getInitials(child.kidIndex)}</div>
+                            <div class="avatar">${getInitials(child.kidName)}</div>
                             <div class="player-details">
-                                <div class="player-name"> ${child.kidIndex}</div>
+                                <div class="player-name"> ${child.kidName}</div>
                                 <div class="player-parent">ID: ${child.userID}</div>
                             </div>
                         </div>
@@ -1624,7 +1640,7 @@
             const viewFullDashboard = document.getElementById('view-full-dashboard');
             
             // Mettre à jour les informations du dashboard
-            dashboardName.textContent = `Enfant ${child.kidIndex}`;
+            dashboardName.textContent = `Enfant ${child.kidName}`;
             dashboardParent.textContent = `ID: ${child.userID}`;
             infoScore.textContent = formatScore(child.total_score);
             infoRank.textContent = `#${rank}`;
@@ -1633,7 +1649,7 @@
             
             // Configurer le lien vers le dashboard complet
             viewFullDashboard.onclick = () => {
-                window.location.href = `/auth/dashboard/${child.userID}`;
+                window.location.href = `/auth/dashboard/${child.userID}/${child.kidIndex}`;
             };
             
             // Afficher le modal
@@ -1646,31 +1662,30 @@
             generateLeaderboard(filteredChildren);
         }
 
-    // Fonction pour appliquer les filtres du leaderboard
-    async function applyLeaderboardFilters() {
-        const gradeFilter = document.getElementById('leaderboard-grade-filter').value;
-        const subjectFilter = document.getElementById('leaderboard-subject-filter').value;
-        const timeFilter = document.getElementById('leaderboard-time-filter').value;
+        // Fonction pour appliquer les filtres du leaderboard
+        async function applyLeaderboardFilters() {
+            const gradeFilter = document.getElementById('leaderboard-grade-filter').value;
+            const subjectFilter = document.getElementById('leaderboard-subject-filter').value;
+            const timeFilter = document.getElementById('leaderboard-time-filter').value;
 
-        const query = new URLSearchParams({
-            grade: gradeFilter !== 'all' ? gradeFilter : '',
-            subject: subjectFilter !== 'all' ? subjectFilter : '',
-            period: timeFilter
-        });
+            const query = new URLSearchParams({
+                grade: gradeFilter !== 'all' ? gradeFilter : '',
+                subject: subjectFilter !== 'all' ? subjectFilter : '',
+                period: timeFilter
+            });
 
-        try {
-            const response = await fetch(`/api/stats/kids?${query}`);
-            const data = await response.json();
+            try {
+                const response = await fetch(`/api/stats/kids?${query}`);
+                const data = await response.json();
 
-            filteredChildren = data;
+                filteredChildren = data;
 
-                        generateLeaderboard(filteredChildren);
-        } catch (error) {
-            console.error('Erreur lors du filtrage des données:', error);
+                            generateLeaderboard(filteredChildren);
+            } catch (error) {
+                console.error('Erreur lors du filtrage des données:', error);
+            }
         }
-    }
-   
-
+    
         // Charger les données du leaderboard
         async function loadLeaderboardData() {
             // Afficher le loader

@@ -103,9 +103,7 @@ def dashboard_admin():
 def login():
     return render_template("admin/login.html")
 
-@app.route("/leaderboard")
-def leaderBoard():
-    return render_template("admin/test.html")
+
 
 @app.route("/board")
 def Board():

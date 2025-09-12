@@ -824,7 +824,7 @@
     <script>
         // Variables dynamiques venant de Flask
         let userID = "{{ parent.userID }}";
-        let kidIndex = "0"; // Par défaut, le premier enfant
+        let kidIndex = "{{ kid }}"||"0"; // Par défaut, le premier enfant
         let currentPeriod = "week";
         let currentDate = new Date();
 
@@ -851,7 +851,6 @@
 
                 loadNameKids(userID);
                 setupEventListeners();
-                updateDisplayedData();
             
         });
 
@@ -895,9 +894,8 @@
 
                 // 6️⃣ Sélection par défaut index "0"
                 if (select.options.length > 0) {
-                    select.value = "0";
-                    console.log("🎯 Sélection par défaut: enfant index 0");
-                    kidIndex = "0";
+                    select.value = kidIndex || "0";
+                    console.log("🎯 Sélection par défaut: enfant index ", kidIndex);
                     updateDisplayedData();
                 } else {
                     console.warn("⚠️ Aucun enfant trouvé dans la réponse API");
@@ -1087,8 +1085,8 @@
 
             // Temps d'étude en minutes
             const studyTime = data.time_spent || 0;
-            const hours = Math.floor(studyTime / 60);
-            const minutes = studyTime % 60;
+            const hours = Math.floor(studyTime / 60)/60;
+            const minutes = Math.floor(studyTime / 60) % 60;
             const hoursText = window.i18n.t('time.hours');
             const minutesText = window.i18n.t('time.minutes');
             document.getElementById("study-mins").innerText = `${hours.toFixed(0)}${hoursText} ${minutes.toFixed(0)}${minutesText}`;

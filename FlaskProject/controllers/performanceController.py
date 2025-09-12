@@ -8,8 +8,7 @@ from dateutil import parser
 import calendar
 
 
-class PerformanceController:
-    
+class PerformanceController:    
     @staticmethod
     def get_messages_codes(userId, kidIndex):
         try:
@@ -554,7 +553,6 @@ def calculate_engagement(attempts, from_date, to_date):
     total_days = (to_date.date() - from_date.date()).days + 1
     return len(practice_days), total_days
 
-
 def calculate_streak(attempts):
     """
     Calcule le nombre maximum de jours consécutifs avec au moins un quiz complété.
@@ -586,7 +584,6 @@ def calculate_streak(attempts):
 
     return max_streak
     
-
 def calculate_completion_rate(attempts):
     """Taux de complétion des quiz"""
     if not attempts:
@@ -640,7 +637,7 @@ def total_time_spent(attempts):
     for a in attempts:
         if a.get("timeout") != 1 and a.get("duration"):
             total_time += a.get("duration")
-    return total_time / 60  # minutes
+    return total_time  # minutes
 
 def persistent_failures(attempts):
     """Quiz échoués de manière persistante (≥ 3 fois)"""
